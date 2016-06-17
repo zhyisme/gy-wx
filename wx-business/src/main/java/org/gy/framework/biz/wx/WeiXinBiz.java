@@ -3,6 +3,7 @@ package org.gy.framework.biz.wx;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,10 +23,16 @@ import org.gy.framework.weixin.message.response.WeiXinResponse;
 import org.gy.framework.weixin.service.WeiXinCoreService;
 import org.gy.framework.weixin.util.WeiXinConstantUtil;
 import org.gy.framework.weixin.util.WeiXinUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
+
+    @Autowired
+    private ThreadPoolExecutor  executor;
+    @Autowired
+    private WeiXinUserRecordBiz weiXinUserRecordBiz;
 
     /**
      * 获取全局配置
@@ -102,8 +109,24 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
         } else if (requestMessage instanceof EventRequestMessage) {
             responseMessage = dealMessage((EventRequestMessage) requestMessage);
         }
+        final String openId = requestMessage.getFromUserName();
+        // 记录用户操作
+        addUserRecord(openId);
         return responseMessage;
 
+    }
+
+    private void addUserRecord(final String openId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    weiXinUserRecordBiz.addOrUpdateUserRecord(openId);
+                } catch (Exception e) {
+                    logger.error("记录微信用户记录异常：" + e.getMessage(), e);
+                }
+            }
+        });
     }
 
     /**
@@ -148,8 +171,7 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
         return null;
     }
 
-    private WeiXinResponse dealText(WeiXinRequest requestMessage,
-                                    String message) {
+    private WeiXinResponse dealText(WeiXinRequest requestMessage, String message) {
         TextResponseMessage responseMessage = new TextResponseMessage();
         responseMessage.setContent(message);
         responseMessage.setMsgType(WeiXinConstantUtil.MESSAGE_TYPE_TEXT);
