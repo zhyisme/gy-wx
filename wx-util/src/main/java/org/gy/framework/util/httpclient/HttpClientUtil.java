@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -21,6 +24,20 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +55,18 @@ public class HttpClientUtil {
     public static final int       DEFAULT_CONNECT_TIMEOUT = 5000;
     public static final int       DEFAULT_READ_TIMEOUT    = 5000;
 
+    private static HttpClient     httpClient;
+
+    static {
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_READ_TIMEOUT).setConnectTimeout(DEFAULT_CONNECT_TIMEOUT).build();
+        builder.setDefaultRequestConfig(requestConfig);
+        httpClient = builder.build();
+    }
+
     public static void main(String[] args) {
         String url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx1c460a2ee998cefb&secret=4b88500e02b8bd1ce4a20108bb660e81";
-        String result = defaultPost(url,null);
+        String result = defaultPost(url, null);
         System.out.println(result);
     }
 
@@ -229,6 +255,101 @@ public class HttpClientUtil {
 
         public void checkServerTrusted(X509Certificate[] chain,
                                        String authType) throws CertificateException {
+        }
+    }
+
+    public static String get(String url,
+                             Map<String, String> headers) {
+        HttpGet request = new HttpGet(url);
+        try {
+            wrapHeader(request, headers);// 设置请求头
+            return execute(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (request != null) {
+                request.releaseConnection();
+            }
+        }
+        return null;
+    }
+
+    public static String post(String url,
+                              String body,
+                              Map<String, String> headers) {
+        HttpPost request = new HttpPost(url);
+        try {
+            wrapHeader(request, headers);// 设置请求头
+            wrapStringEntity(request, body);// 设置body
+            return execute(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (request != null) {
+                request.releaseConnection();
+            }
+        }
+        return null;
+    }
+
+    public static String post(String url,
+                              Map<String, String> params,
+                              Map<String, String> headers) {
+        HttpPost request = new HttpPost(url);
+        try {
+            wrapHeader(request, headers);// 设置请求头
+            wrapFormEntity(request, params);
+            return execute(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (request != null) {
+                request.releaseConnection();
+            }
+        }
+        return null;
+    }
+
+    private static String execute(HttpRequestBase request) throws ClientProtocolException, IOException {
+        String respJson = null;
+        HttpResponse response = httpClient.execute(request);
+        if (response.getStatusLine().getStatusCode() == 200) {
+            HttpEntity httpEntity = response.getEntity();
+            respJson = EntityUtils.toString(httpEntity);
+            EntityUtils.consume(httpEntity);
+        }
+        return respJson;
+    }
+
+    private static void wrapHeader(HttpRequestBase request,
+                                   Map<String, String> headers) {
+        // 设置请求头
+        if (null != headers) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                request.addHeader(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private static void wrapStringEntity(HttpPost request,
+                                         String body) {
+        // 设置body
+        if (body != null) {
+            StringEntity entity = new StringEntity(body, DEFAULT_CHARSET);// 解决中文乱码问题
+            entity.setContentEncoding(DEFAULT_CHARSET);
+            entity.setContentType(DEFAULT_CONTENT_TYPE);
+            request.setEntity(entity);
+        }
+    }
+
+    private static void wrapFormEntity(HttpPost request,
+                                       Map<String, String> params) throws UnsupportedEncodingException {
+        if (params != null) {
+            List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                nvps.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+            }
+            request.setEntity(new UrlEncodedFormEntity(nvps, DEFAULT_CHARSET));
         }
     }
 }
