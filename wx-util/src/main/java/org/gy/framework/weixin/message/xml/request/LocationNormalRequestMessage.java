@@ -1,4 +1,4 @@
-package org.gy.framework.weixin.message.request;
+package org.gy.framework.weixin.message.xml.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -19,7 +19,7 @@ public class LocationNormalRequestMessage extends BaseNormalRequest {
      * 地图缩放大小
      */
     @XStreamAlias("Scale")
-    private Double scale;
+    private Integer scale;
     /**
      * 地理位置信息
      */
@@ -67,7 +67,7 @@ public class LocationNormalRequestMessage extends BaseNormalRequest {
      * 
      * @return scale 地图缩放大小
      */
-    public Double getScale() {
+    public Integer getScale() {
         return scale;
     }
 
@@ -76,7 +76,7 @@ public class LocationNormalRequestMessage extends BaseNormalRequest {
      * 
      * @param scale 地图缩放大小
      */
-    public void setScale(Double scale) {
+    public void setScale(Integer scale) {
         this.scale = scale;
     }
 

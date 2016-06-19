@@ -1,4 +1,4 @@
-package org.gy.framework.weixin.message.request;
+package org.gy.framework.weixin.message.xml.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -7,6 +7,9 @@ public class EventRequestMessage extends BaseEventRequest {
 
     @XStreamAlias("EventKey")
     private String eventKey;
+
+    @XStreamAlias("MenuId")
+    private String menuId;
 
     /**
      * 获取eventKey
@@ -24,6 +27,14 @@ public class EventRequestMessage extends BaseEventRequest {
      */
     public void setEventKey(String eventKey) {
         this.eventKey = eventKey;
+    }
+
+    public String getMenuId() {
+        return menuId;
+    }
+
+    public void setMenuId(String menuId) {
+        this.menuId = menuId;
     }
 
 }

@@ -1,6 +1,4 @@
-package org.gy.framework.weixin.message.response;
-
-import org.gy.framework.weixin.message.response.WeiXinResponse;
+package org.gy.framework.weixin.message.xml.response;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 

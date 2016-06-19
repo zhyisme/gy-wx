@@ -1,6 +1,6 @@
-package org.gy.framework.weixin.message.response;
+package org.gy.framework.weixin.message.xml.response;
 
-import org.gy.framework.weixin.message.WeiXinBaseMessage;
+import org.gy.framework.weixin.message.xml.WeiXinBaseMessage;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 

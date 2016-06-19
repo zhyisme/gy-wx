@@ -117,5 +117,9 @@ public class WeiXinConstantUtil {
      * 微信回复类型：空 回复
      */
     public static final String WEIXIN_REPLY_TYPE_EMPTY      = "-1";
+    /**
+     * 日志分隔符
+     */
+    public static final String WEIXIN_LOG_SEPARATOR         = "#";
 
 }

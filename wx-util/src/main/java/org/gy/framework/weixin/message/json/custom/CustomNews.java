@@ -1,4 +1,4 @@
-package org.gy.framework.weixin.message.response.custom;
+package org.gy.framework.weixin.message.json.custom;
 
 import java.util.List;
 

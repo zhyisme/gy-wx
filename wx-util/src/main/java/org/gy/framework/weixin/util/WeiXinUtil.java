@@ -16,11 +16,11 @@ import org.gy.framework.weixin.annotation.UrlParamName;
 import org.gy.framework.weixin.api.ApiExecutable;
 import org.gy.framework.weixin.config.WeiXinConfig;
 import org.gy.framework.weixin.exception.WeiXinException;
-import org.gy.framework.weixin.message.request.EventRequestMessage;
-import org.gy.framework.weixin.message.request.LocationNormalRequestMessage;
-import org.gy.framework.weixin.message.request.TextNormalRequestMessage;
-import org.gy.framework.weixin.message.request.WeiXinRequest;
-import org.gy.framework.weixin.message.response.WeiXinResponse;
+import org.gy.framework.weixin.message.xml.request.EventRequestMessage;
+import org.gy.framework.weixin.message.xml.request.LocationNormalRequestMessage;
+import org.gy.framework.weixin.message.xml.request.TextNormalRequestMessage;
+import org.gy.framework.weixin.message.xml.request.WeiXinRequest;
+import org.gy.framework.weixin.message.xml.response.WeiXinResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

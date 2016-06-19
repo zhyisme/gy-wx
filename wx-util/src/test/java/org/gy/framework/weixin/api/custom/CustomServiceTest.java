@@ -8,9 +8,9 @@ import junit.framework.TestCase;
 import org.gy.framework.weixin.api.token.SimpleAccessToken;
 import org.gy.framework.weixin.config.Configurable;
 import org.gy.framework.weixin.config.WeiXinConfigFactory;
-import org.gy.framework.weixin.message.response.custom.CustomArticle;
-import org.gy.framework.weixin.message.response.custom.CustomNews;
-import org.gy.framework.weixin.message.response.custom.CustomNewsMessage;
+import org.gy.framework.weixin.message.json.custom.CustomArticle;
+import org.gy.framework.weixin.message.json.custom.CustomNews;
+import org.gy.framework.weixin.message.json.custom.CustomNewsMessage;
 import org.gy.framework.weixin.util.WeiXinConstantUtil;
 
 public class CustomServiceTest extends TestCase {

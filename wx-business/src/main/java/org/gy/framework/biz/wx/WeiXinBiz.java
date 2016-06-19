@@ -10,16 +10,18 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gy.framework.biz.BaseBiz;
+import org.gy.framework.model.WeixinReplyLog;
+import org.gy.framework.weixin.api.token.SimpleAccessToken;
 import org.gy.framework.weixin.config.Configurable;
 import org.gy.framework.weixin.config.WeiXinConfig;
 import org.gy.framework.weixin.config.WeiXinConfigFactory;
 import org.gy.framework.weixin.exception.WeiXinException;
-import org.gy.framework.weixin.message.request.EventRequestMessage;
-import org.gy.framework.weixin.message.request.LocationNormalRequestMessage;
-import org.gy.framework.weixin.message.request.TextNormalRequestMessage;
-import org.gy.framework.weixin.message.request.WeiXinRequest;
-import org.gy.framework.weixin.message.response.TextResponseMessage;
-import org.gy.framework.weixin.message.response.WeiXinResponse;
+import org.gy.framework.weixin.message.xml.request.EventRequestMessage;
+import org.gy.framework.weixin.message.xml.request.LocationNormalRequestMessage;
+import org.gy.framework.weixin.message.xml.request.TextNormalRequestMessage;
+import org.gy.framework.weixin.message.xml.request.WeiXinRequest;
+import org.gy.framework.weixin.message.xml.response.TextResponseMessage;
+import org.gy.framework.weixin.message.xml.response.WeiXinResponse;
 import org.gy.framework.weixin.service.WeiXinCoreService;
 import org.gy.framework.weixin.util.WeiXinConstantUtil;
 import org.gy.framework.weixin.util.WeiXinUtil;
@@ -30,15 +32,27 @@ import org.springframework.stereotype.Service;
 public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
 
     @Autowired
-    private ThreadPoolExecutor  executor;
+    private ThreadPoolExecutor       executor;
     @Autowired
-    private WeiXinUserRecordBiz weiXinUserRecordBiz;
+    private WeiXinUserRecordBiz      weiXinUserRecordBiz;
+
+    @Autowired
+    private WeiXinReplyLogBiz        weiXinReplyLogBiz;
+
+    private static SimpleAccessToken simpleAccessToken;
+
+    private static Configurable      configurable;
+
+    static {
+        configurable = WeiXinConfigFactory.getConfigurable(WeiXinConfigFactory.DEFAULT_LOCATION);
+        simpleAccessToken = new SimpleAccessToken(configurable);
+    }
 
     /**
      * 获取全局配置
      */
     public Configurable getConfigurable() {
-        return WeiXinConfigFactory.getConfigurable(WeiXinConfigFactory.DEFAULT_LOCATION);
+        return configurable;
     }
 
     /**
@@ -46,8 +60,15 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
      * 
      */
     public WeiXinConfig getWeiXinConfig() {
-        Configurable config = getConfigurable();
-        return config.getWeiXinConfig();
+        return configurable.getWeiXinConfig();
+    }
+
+    /**
+     * 功能描述: 获取token
+     * 
+     */
+    public String getToken() {
+        return simpleAccessToken.refreshToken();
     }
 
     @Override
@@ -129,12 +150,37 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
         });
     }
 
+    private void addReplyLog(final WeixinReplyLog entity) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    weiXinReplyLogBiz.insert(entity);
+                } catch (Exception e) {
+                    logger.error("添加微信日志异常：" + e.getMessage(), e);
+                }
+            }
+        });
+    }
+
+    private WeixinReplyLog wrapWeixinReplyLog(WeiXinRequest requestMessage) {
+        WeixinReplyLog log = new WeixinReplyLog();
+        log.setOpenId(requestMessage.getFromUserName());
+        log.setType(requestMessage.getMsgType());
+        return log;
+    }
+
     /**
      * 文本消息处理
      */
     private WeiXinResponse dealMessage(TextNormalRequestMessage requestMessage) {
 
         String keywords = requestMessage.getContent();// 根据关键字分发处理
+        // 记录日志
+        WeixinReplyLog log = wrapWeixinReplyLog(requestMessage);
+        log.setContent(keywords);
+        addReplyLog(log);
+
         return dealText(requestMessage, "您发送的是文本消息！" + keywords);
     }
 
@@ -144,6 +190,15 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
      */
     private WeiXinResponse dealMessage(LocationNormalRequestMessage requestMessage) {
 
+        // 记录日志
+        WeixinReplyLog log = wrapWeixinReplyLog(requestMessage);
+        StringBuilder builder = new StringBuilder();
+        builder.append(requestMessage.getLocationX()).append(WeiXinConstantUtil.WEIXIN_LOG_SEPARATOR);
+        builder.append(requestMessage.getLocationY()).append(WeiXinConstantUtil.WEIXIN_LOG_SEPARATOR);
+        builder.append(requestMessage.getScale()).append(WeiXinConstantUtil.WEIXIN_LOG_SEPARATOR);
+        builder.append(requestMessage.getLabel());
+        log.setContent(builder.toString());
+        addReplyLog(log);
         return dealText(requestMessage, "您发送的是位置信息！" + requestMessage.getLabel());
     }
 

@@ -3,40 +3,18 @@ package org.gy.framework.weixin.api.token;
 import java.util.Map;
 
 import org.gy.framework.util.json.JacksonMapper;
-import org.gy.framework.weixin.annotation.UrlParamName;
-import org.gy.framework.weixin.api.ApiExecutor;
-import org.gy.framework.weixin.api.MethodType;
 import org.gy.framework.weixin.config.Configurable;
 import org.gy.framework.weixin.config.WeiXinConfig;
 
-public class SimpleAccessToken extends ApiExecutor {
+public class SimpleAccessToken extends AbstractAccessToken {
 
     public static final TokenStore tokenStore = new TokenStore();
-
-    /**
-     * 获取access_token填写client_credential
-     */
-    private String                 grantType;
-
-    /**
-     * 填写appid
-     */
-    private String                 appId;
-
-    /**
-     * 填写appsecret
-     */
-    private String                 secret;
 
     public SimpleAccessToken(Configurable configurable) {
         super(configurable);
     }
 
     @Override
-    public MethodType getMethodType() {
-        return MethodType.GET;
-    }
-
     public String refreshToken() {
         WeiXinConfig config = getWeiXinConfig();
         int expireTime = config.getExpireTime();// 有效时间
@@ -56,11 +34,6 @@ public class SimpleAccessToken extends ApiExecutor {
             }
         }
         return token;
-    }
-
-    @Override
-    public String getBodyContent() {
-        return null;
     }
 
     static class TokenStore {
@@ -92,8 +65,7 @@ public class SimpleAccessToken extends ApiExecutor {
          * @param second 有效期
          * @return
          */
-        public boolean isExpire(long timestamp,
-                                int second) {
+        public boolean isExpire(long timestamp, int second) {
             return (timestamp - this.timestamp) >= second * 1000;
         }
 
@@ -139,63 +111,6 @@ public class SimpleAccessToken extends ApiExecutor {
             this.token = token;
         }
 
-    }
-
-    /**
-     * 获取获取access_token填写client_credential
-     * 
-     * @return grantType 获取access_token填写client_credential
-     */
-    @UrlParamName("grant_type")
-    public String getGrantType() {
-        return grantType;
-    }
-
-    /**
-     * 设置获取access_token填写client_credential
-     * 
-     * @param grantType 获取access_token填写client_credential
-     */
-    public void setGrantType(String grantType) {
-        this.grantType = grantType;
-    }
-
-    /**
-     * 获取填写appid
-     * 
-     * @return appId 填写appid
-     */
-    @UrlParamName("appid")
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * 设置填写appid
-     * 
-     * @param appId 填写appid
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * 获取填写appsecret
-     * 
-     * @return secret 填写appsecret
-     */
-    @UrlParamName("secret")
-    public String getSecret() {
-        return secret;
-    }
-
-    /**
-     * 设置填写appsecret
-     * 
-     * @param secret 填写appsecret
-     */
-    public void setSecret(String secret) {
-        this.secret = secret;
     }
 
 }

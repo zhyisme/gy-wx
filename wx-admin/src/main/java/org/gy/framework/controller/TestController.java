@@ -5,15 +5,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.gy.framework.biz.wx.WeiXinBiz;
+import org.gy.framework.biz.wx.WeiXinMenuConfigBiz;
 import org.gy.framework.weixin.api.custom.CustomService;
-import org.gy.framework.weixin.api.token.SimpleAccessToken;
 import org.gy.framework.weixin.config.Configurable;
-import org.gy.framework.weixin.message.response.custom.CustomArticle;
-import org.gy.framework.weixin.message.response.custom.CustomNews;
-import org.gy.framework.weixin.message.response.custom.CustomNewsMessage;
+import org.gy.framework.weixin.message.json.custom.CustomArticle;
+import org.gy.framework.weixin.message.json.custom.CustomNews;
+import org.gy.framework.weixin.message.json.custom.CustomNewsMessage;
 import org.gy.framework.weixin.util.WeiXinConstantUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +21,13 @@ import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 
 @Controller
 @RequestMapping("/test")
-public class TestController {
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+public class TestController extends BaseController {
 
     @Autowired
-    private WeiXinBiz      weiXinBiz;
+    private WeiXinBiz           weiXinBiz;
+
+    @Autowired
+    private WeiXinMenuConfigBiz weiXinMenuConfigBiz;
 
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     public ModelAndView test() {
@@ -46,14 +45,27 @@ public class TestController {
         return mav;
     }
 
+    @RequestMapping(value = "/getMenu", method = RequestMethod.GET)
+    public ModelAndView getMenu() {
+        ModelAndView mav = new ModelAndView(new MappingJacksonJsonView());
+        mav.addObject("menu", weiXinMenuConfigBiz.selectMenuList());
+        mav.addObject("menuJson", weiXinMenuConfigBiz.getMenuJson());
+        return mav;
+    }
+
+    @RequestMapping(value = "/token", method = RequestMethod.GET)
+    public ModelAndView token() {
+        ModelAndView mav = new ModelAndView(new MappingJacksonJsonView());
+        mav.addObject("token", weiXinBiz.getToken());
+        return mav;
+    }
+
     @RequestMapping(value = "/customService", method = RequestMethod.GET)
     public ModelAndView customService(String openId) {
         ModelAndView mav = new ModelAndView(new MappingJacksonJsonView());
 
         Configurable configurable = weiXinBiz.getConfigurable();
-
-        SimpleAccessToken token = new SimpleAccessToken(configurable);
-        String result = token.refreshToken();
+        String result = weiXinBiz.getToken();
 
         CustomNewsMessage message = new CustomNewsMessage();
         CustomService customService = new CustomService(configurable);
@@ -78,7 +90,7 @@ public class TestController {
         list.add(article);
 
         String customResult = customService.execute();
-        
+
         mav.addObject("accessToken", result);
         mav.addObject("customResult", customResult);
         mav.addObject("time", System.currentTimeMillis());

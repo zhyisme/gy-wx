@@ -17,18 +17,14 @@ public abstract class ApiExecutor implements ApiExecutable {
 
     public static final String CONTEXT = ".context";
 
-    /**
-     * 微信配置
-     */
-    private WeiXinConfig       weiXinConfig;
-
+    private Configurable       configurable;
     /**
      * 访问token
      */
     private String             accessToken;
 
     public ApiExecutor(Configurable configurable) {
-        this.weiXinConfig = configurable.getWeiXinConfig();
+        this.configurable = configurable;
     }
 
     /**
@@ -42,7 +38,7 @@ public abstract class ApiExecutor implements ApiExecutable {
 
     @Override
     public String getApiUrl() {
-        Properties properties = weiXinConfig.getProperties();
+        Properties properties = getProperties();
         // 获取请求路径
         String path = properties.getProperty(getContextPath());
         if (path == null) {
@@ -90,7 +86,11 @@ public abstract class ApiExecutor implements ApiExecutable {
      * @return weiXinConfig 微信配置
      */
     public WeiXinConfig getWeiXinConfig() {
-        return weiXinConfig;
+        return configurable.getWeiXinConfig();
+    }
+
+    public Properties getProperties() {
+        return getWeiXinConfig().getProperties();
     }
 
     /**
@@ -110,5 +110,13 @@ public abstract class ApiExecutor implements ApiExecutable {
      */
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public Configurable getConfigurable() {
+        return configurable;
+    }
+
+    public void setConfigurable(Configurable configurable) {
+        this.configurable = configurable;
     }
 }

@@ -4,7 +4,7 @@ import org.gy.framework.util.json.JacksonMapper;
 import org.gy.framework.weixin.api.ApiExecutor;
 import org.gy.framework.weixin.api.MethodType;
 import org.gy.framework.weixin.config.Configurable;
-import org.gy.framework.weixin.message.response.custom.CustomBaseMessage;
+import org.gy.framework.weixin.message.json.custom.CustomBaseMessage;
 
 public class CustomService extends ApiExecutor {
 

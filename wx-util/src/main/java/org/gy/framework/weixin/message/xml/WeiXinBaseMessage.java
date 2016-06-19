@@ -1,4 +1,4 @@
-package org.gy.framework.weixin.message;
+package org.gy.framework.weixin.message.xml;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 

@@ -1,9 +1,7 @@
-package org.gy.framework.weixin.message.response;
+package org.gy.framework.weixin.message.xml.response;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.gy.framework.weixin.message.response.WeiXinResponse;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
