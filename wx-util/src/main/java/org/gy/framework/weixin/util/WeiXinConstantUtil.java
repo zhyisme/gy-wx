@@ -120,6 +120,6 @@ public class WeiXinConstantUtil {
     /**
      * 日志分隔符
      */
-    public static final String WEIXIN_LOG_SEPARATOR         = "#";
+    public static final String WEIXIN_LOG_SEPARATOR         = "@@";
 
 }

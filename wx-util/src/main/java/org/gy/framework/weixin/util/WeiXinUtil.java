@@ -17,6 +17,7 @@ import org.gy.framework.weixin.api.ApiExecutable;
 import org.gy.framework.weixin.config.WeiXinConfig;
 import org.gy.framework.weixin.exception.WeiXinException;
 import org.gy.framework.weixin.message.xml.request.EventRequestMessage;
+import org.gy.framework.weixin.message.xml.request.LinkNormalRequestMessage;
 import org.gy.framework.weixin.message.xml.request.LocationNormalRequestMessage;
 import org.gy.framework.weixin.message.xml.request.TextNormalRequestMessage;
 import org.gy.framework.weixin.message.xml.request.WeiXinRequest;
@@ -52,8 +53,7 @@ public class WeiXinUtil {
                     boolean cdata = false;
 
                     @SuppressWarnings("unchecked")
-                    public void startNode(String name,
-                                          @SuppressWarnings("rawtypes") Class clazz) {
+                    public void startNode(String name, @SuppressWarnings("rawtypes") Class clazz) {
                         if (clazz.isAssignableFrom(String.class)) {
                             cdata = true;
                         } else {
@@ -62,8 +62,7 @@ public class WeiXinUtil {
                         super.startNode(name, clazz);
                     }
 
-                    protected void writeText(QuickWriter writer,
-                                             String text) {
+                    protected void writeText(QuickWriter writer, String text) {
                         if (cdata) {
                             writer.write("<![CDATA[");
                             writer.write(text);
@@ -84,6 +83,7 @@ public class WeiXinUtil {
         MESSAGE_TYPE_MAP.put(WeiXinConstantUtil.EVENT_TYPE_UNSUBSCRIBE, EventRequestMessage.class);
         MESSAGE_TYPE_MAP.put(WeiXinConstantUtil.EVENT_TYPE_CLICK, EventRequestMessage.class);
         MESSAGE_TYPE_MAP.put(WeiXinConstantUtil.EVENT_TYPE_VIEW, EventRequestMessage.class);
+        MESSAGE_TYPE_MAP.put(WeiXinConstantUtil.MESSAGE_TYPE_LINK, LinkNormalRequestMessage.class);
     }
 
     /**
@@ -153,7 +153,7 @@ public class WeiXinUtil {
      */
     public static WeiXinResponse generateResponseMessage(WeiXinRequest requestMessage) {
         WeiXinResponse responseMessage = new WeiXinResponse();
-        return packageResponseMessage(requestMessage,responseMessage);
+        return packageResponseMessage(requestMessage, responseMessage);
     }
 
     /**
@@ -163,8 +163,7 @@ public class WeiXinUtil {
      * @param requestMessage 用于交换from和to
      * @return WeiXinMessage
      */
-    public static WeiXinResponse changeFromUserToUser(WeiXinRequest requestMessage,
-                                                      WeiXinResponse responseMessage) {
+    public static WeiXinResponse changeFromUserToUser(WeiXinRequest requestMessage, WeiXinResponse responseMessage) {
 
         responseMessage.setFromUserName(requestMessage.getToUserName());
         responseMessage.setToUserName(requestMessage.getFromUserName());
@@ -177,8 +176,7 @@ public class WeiXinUtil {
      * 功能描述: 打包消息--交换from to、添加创建时间
      * 
      */
-    public static WeiXinResponse packageResponseMessage(WeiXinRequest request,
-                                                        WeiXinResponse response) {
+    public static WeiXinResponse packageResponseMessage(WeiXinRequest request, WeiXinResponse response) {
 
         changeFromUserToUser(request, response);
         response.setCreateTime(System.currentTimeMillis());
@@ -201,8 +199,7 @@ public class WeiXinUtil {
      * 
      */
     @SuppressWarnings("unchecked")
-    public static <T> T xml2bean(String xml,
-                                 Class<T> clazz) {
+    public static <T> T xml2bean(String xml, Class<T> clazz) {
         XStream xStream = checkDuplicateAliasClassXStream(clazz);
         xStream.processAnnotations(clazz);
         return (T) xStream.fromXML(xml);
@@ -272,8 +269,7 @@ public class WeiXinUtil {
      * @param ignoreFlag 是否忽略空值，true忽略，false不忽略
      * @return
      */
-    public static String extractUrlParamFromApiExecutable(ApiExecutable executor,
-                                                          boolean ignoreFlag) {
+    public static String extractUrlParamFromApiExecutable(ApiExecutable executor, boolean ignoreFlag) {
         StringBuffer buf = new StringBuffer();
 
         Method[] methods = executor.getClass().getMethods();

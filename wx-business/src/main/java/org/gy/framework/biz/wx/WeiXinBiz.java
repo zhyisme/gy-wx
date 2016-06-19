@@ -17,6 +17,7 @@ import org.gy.framework.weixin.config.WeiXinConfig;
 import org.gy.framework.weixin.config.WeiXinConfigFactory;
 import org.gy.framework.weixin.exception.WeiXinException;
 import org.gy.framework.weixin.message.xml.request.EventRequestMessage;
+import org.gy.framework.weixin.message.xml.request.LinkNormalRequestMessage;
 import org.gy.framework.weixin.message.xml.request.LocationNormalRequestMessage;
 import org.gy.framework.weixin.message.xml.request.TextNormalRequestMessage;
 import org.gy.framework.weixin.message.xml.request.WeiXinRequest;
@@ -129,6 +130,8 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
             responseMessage = dealMessage((LocationNormalRequestMessage) requestMessage);
         } else if (requestMessage instanceof EventRequestMessage) {
             responseMessage = dealMessage((EventRequestMessage) requestMessage);
+        } else if (requestMessage instanceof LinkNormalRequestMessage) {
+            responseMessage = dealMessage((LinkNormalRequestMessage) requestMessage);
         }
         final String openId = requestMessage.getFromUserName();
         // 记录用户操作
@@ -200,6 +203,23 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
         log.setContent(builder.toString());
         addReplyLog(log);
         return dealText(requestMessage, "您发送的是位置信息！" + requestMessage.getLabel());
+    }
+
+    /**
+     * 链接消息处理
+     */
+    private WeiXinResponse dealMessage(LinkNormalRequestMessage requestMessage) {
+
+        // 记录日志
+        // WeixinReplyLog log = wrapWeixinReplyLog(requestMessage);
+        // StringBuilder builder = new StringBuilder();
+        // builder.append(requestMessage.getTitle()).append(WeiXinConstantUtil.WEIXIN_LOG_SEPARATOR);
+        // builder.append(requestMessage.getDescription()).append(WeiXinConstantUtil.WEIXIN_LOG_SEPARATOR);
+        // builder.append(requestMessage.getUrl());
+        // log.setContent(builder.toString());
+        // addReplyLog(log);
+
+        return dealText(requestMessage, "您发送的是链接消息！" + requestMessage.getUrl());
     }
 
     /**
