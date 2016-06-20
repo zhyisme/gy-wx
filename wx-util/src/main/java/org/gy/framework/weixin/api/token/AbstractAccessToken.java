@@ -27,7 +27,7 @@ public abstract class AbstractAccessToken extends ApiExecutor {
      * 
      * @return
      */
-    public abstract String refreshToken();
+    public abstract TokenResponse refreshToken();
 
     public AbstractAccessToken(Configurable configurable) {
         super(configurable);

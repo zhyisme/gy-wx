@@ -1,114 +1,130 @@
 package org.gy.framework.weixin.api.token;
 
-import java.util.Map;
-
 import org.gy.framework.util.json.JacksonMapper;
 import org.gy.framework.weixin.config.Configurable;
 import org.gy.framework.weixin.config.WeiXinConfig;
 
 public class SimpleAccessToken extends AbstractAccessToken {
 
-    public static final TokenStore tokenStore = new TokenStore();
+    private static final TokenStore tokenStore = new TokenStore();
 
     public SimpleAccessToken(Configurable configurable) {
         super(configurable);
     }
 
     @Override
-    public String refreshToken() {
+    public TokenResponse refreshToken() {
         WeiXinConfig config = getWeiXinConfig();
-        int expireTime = config.getExpireTime();// 有效时间
         String token = tokenStore.getToken();
-        if (tokenStore.isExpire(expireTime) || token == null) {
+        if (tokenStore.validateExpire() || token == null) {
             synchronized (tokenStore) {
                 token = tokenStore.getToken();
-                if (tokenStore.isExpire(expireTime) || token == null) {
+                if (tokenStore.validateExpire() || token == null) {
                     this.setAppId(config.getAppId());
                     this.setGrantType(config.getGrantType());
                     this.setSecret(config.getSecret());
                     String result = this.execute();
-                    Map<String, String> map = JacksonMapper.jsonToBean(result, Map.class, String.class, String.class);
-                    token = map.get("access_token");
-                    tokenStore.restore(token);
+                    TokenResponse response = JacksonMapper.jsonToBean(result, TokenResponse.class);
+                    token = response.getAsscessToken();
+                    tokenStore.restore(token, response.getExpireTime());
                 }
             }
         }
-        return token;
+        TokenResponse result = new TokenResponse();
+        result.setAsscessToken(token);
+        result.setExpireTime(tokenStore.getExpireTime());
+        return result;
     }
 
     static class TokenStore {
 
         /**
-         * 存储时间戳
-         */
-        private long   timestamp;
-
-        /**
-         * token值
+         * token
          */
         private String token;
 
         /**
-         * 是否过期，true表示过期，false未过期
-         * 
-         * @param second 有效期
-         * @return
+         * 有效期
          */
-        public boolean isExpire(int second) {
-            return isExpire(System.currentTimeMillis(), second);
-        }
+        private int    expireTime;
+        /**
+         * 存储时间戳
+         */
+        private long   storeTime;
 
         /**
-         * 是否过期，true表示过期，false未过期
+         * 功能描述: 是否过期，true表示过期，false未过期
          * 
-         * @param timestamp 参照时间
-         * @param second 有效期
          * @return
          */
-        public boolean isExpire(long timestamp, int second) {
-            return (timestamp - this.timestamp) >= second * 1000;
+        public boolean validateExpire() {
+            long current = System.currentTimeMillis();
+            int timeNum = (int) ((current - this.storeTime) / 1000);
+            storeTime = current;
+            expireTime -= timeNum;
+            return expireTime < 0;
         }
 
-        public TokenStore restore(String token) {
+        public TokenStore restore(String token,
+                                  int expireTime) {
             this.setToken(token);
-            this.setTimestamp(System.currentTimeMillis());
+            this.setStoreTime(System.currentTimeMillis());
+            this.setExpireTime(expireTime);
             return this;
         }
 
         /**
-         * 获取存储时间戳
+         * 获取token
          * 
-         * @return timestamp 存储时间戳
-         */
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        /**
-         * 设置存储时间戳
-         * 
-         * @param timestamp 存储时间戳
-         */
-        public void setTimestamp(long timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        /**
-         * 获取token值
-         * 
-         * @return token token值
+         * @return token token
          */
         public String getToken() {
             return token;
         }
 
         /**
-         * 设置token值
+         * 设置token
          * 
-         * @param token token值
+         * @param token token
          */
         public void setToken(String token) {
             this.token = token;
+        }
+
+        /**
+         * 获取有效期
+         * 
+         * @return expireTime 有效期
+         */
+        public int getExpireTime() {
+            return expireTime;
+        }
+
+        /**
+         * 设置有效期
+         * 
+         * @param expireTime 有效期
+         */
+        public void setExpireTime(int expireTime) {
+            this.expireTime = expireTime;
+        }
+
+        /**
+         * 获取存储时间戳
+         * 
+         * @return storeTime 存储时间戳
+         */
+        public long getStoreTime() {
+            return storeTime;
+        }
+
+        /**
+         * 设置存储时间戳
+         * 
+         * @param storeTime 存储时间戳
+         */
+        public void setStoreTime(long storeTime) {
+            this.storeTime = storeTime;
         }
 
     }

@@ -18,7 +18,7 @@ public class CustomServiceTest extends TestCase {
     public void testSendMessage() {
         Configurable configurable = WeiXinConfigFactory.getConfigurable("weixin.properties");
         SimpleAccessToken token = new SimpleAccessToken(configurable);
-        String result = token.refreshToken();
+        String result = token.refreshToken().getAsscessToken();
         System.out.println(result);
 
         CustomNewsMessage message = new CustomNewsMessage();

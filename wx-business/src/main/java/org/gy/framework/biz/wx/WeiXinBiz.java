@@ -63,13 +63,13 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
     public WeiXinConfig getWeiXinConfig() {
         return configurable.getWeiXinConfig();
     }
-
+    
     /**
      * 功能描述: 获取token
      * 
      */
     public String getToken() {
-        return simpleAccessToken.refreshToken();
+        return simpleAccessToken.refreshToken().getAsscessToken();
     }
 
     @Override

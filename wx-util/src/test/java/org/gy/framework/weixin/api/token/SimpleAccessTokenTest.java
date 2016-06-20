@@ -10,7 +10,7 @@ public class SimpleAccessTokenTest extends TestCase {
     public void testAccessToken() {
         Configurable configurable = WeiXinConfigFactory.getConfigurable("weixin.properties");
         SimpleAccessToken token = new SimpleAccessToken(configurable);
-        String result = token.refreshToken();
+        String result = token.refreshToken().getAsscessToken();
         System.out.println(result);
     }
 }
