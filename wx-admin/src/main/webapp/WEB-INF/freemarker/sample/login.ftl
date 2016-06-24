@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en" class="no-js">
     <head>
-        <title>潮品巷-管理系统</title>
+        <title>wx-admin-管理系统</title>
         <@resMacro.cssurl resRoot="${cssServerAdmin}/assets/css" url=["/reset","/supersized","/style"] resConcat="${resConcat}" />
     </head>
     <body>
