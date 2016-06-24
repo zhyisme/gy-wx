@@ -15,6 +15,11 @@
 		<module>../wx-business</module>
 		<module>../wx-admin</module>
 	</modules>
+	<!-- 项目属性 -->
+	<properties>
+		<!-- jar 版本设置 -->
+		<shiro.version>1.2.3</shiro.version>
+	</properties>
 	<profiles>
 		<profile>
 			<id>dev</id>
@@ -52,4 +57,34 @@
 			</build>
 		</profile>
 	</profiles>
+	<dependencyManagement>
+		<dependencies>
+			<!--Apache Shiro所需的jar包 -->
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-core</artifactId>
+				<version>${shiro.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-ehcache</artifactId>
+				<version>${shiro.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-web</artifactId>
+				<version>${shiro.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-quartz</artifactId>
+				<version>${shiro.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-spring</artifactId>
+				<version>${shiro.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
