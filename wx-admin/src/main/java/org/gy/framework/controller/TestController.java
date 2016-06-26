@@ -41,7 +41,9 @@ public class TestController extends BaseController {
     public ModelAndView json() {
         ModelAndView mav = new ModelAndView(new MappingJacksonJsonView());
         mav.addObject("time", new Date());
-        logger.debug("测试日志");
+        logger.debug("测试日志debug");
+        logger.info("测试日志info");
+        logger.error("测试日志error");
         return mav;
     }
 
