@@ -28,8 +28,7 @@ public class IndexController extends BaseController {
     }
 
     @RequestMapping(value = "login", method = RequestMethod.POST)
-    public ModelAndView login(String username,
-                              String password) {
+    public ModelAndView login(String username, String password) {
 
         ModelAndView mav = new ModelAndView(DEFAULT_LOGIN);
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
@@ -37,7 +36,7 @@ public class IndexController extends BaseController {
             return mav;
         }
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
-        token.setRememberMe(true);
+        // token.setRememberMe(true);
         // 获取当前的Subject
         Subject currentUser = SecurityUtils.getSubject();
         try {
