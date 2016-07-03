@@ -1,5 +1,10 @@
 package org.gy.framework.controller;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -8,18 +13,23 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.session.SessionException;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.web.util.WebUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Controller
 @RequestMapping("/")
 public class IndexController extends BaseController {
 
-    public static final String DEFAULT_LOGIN = "sample/login.ftl";
+    public static final String DEFAULT_LOGIN             = "sample/login.ftl";
+
+    public static final String DEFAULT_TARGET_URL_PARAM  = "targetUrl";
+    public static final String DEFAULT_LOGOUT_TARGET_URL = "/login.htm";
+    public static final String DEFAULT_LOGIN_TARGET_URL  = "/index.html";
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ModelAndView toLogin() {
@@ -28,7 +38,7 @@ public class IndexController extends BaseController {
     }
 
     @RequestMapping(value = "login", method = RequestMethod.POST)
-    public ModelAndView login(String username, String password) {
+    public ModelAndView login(String username, String password, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         ModelAndView mav = new ModelAndView(DEFAULT_LOGIN);
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
@@ -60,8 +70,8 @@ public class IndexController extends BaseController {
         // 验证是否登录成功
         if (currentUser.isAuthenticated()) {
             // 这里可以进行一些认证通过后的一些系统参数初始化操作
-            mav.setViewName(InternalResourceViewResolver.REDIRECT_URL_PREFIX + "/index.html");
-            return mav;
+            WebUtils.redirectToSavedRequest(request, response, DEFAULT_LOGIN_TARGET_URL);
+            return null;
         } else {
             token.clear();
         }
@@ -70,12 +80,22 @@ public class IndexController extends BaseController {
 
     /**
      * 用户登出
+     * 
+     * @throws IOException
      */
     @RequestMapping(value = "logout", method = RequestMethod.GET)
-    public ModelAndView logout() {
+    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String targetUrl = request.getParameter(DEFAULT_TARGET_URL_PARAM);
+        if (StringUtils.isBlank(targetUrl)) {
+            targetUrl = DEFAULT_LOGOUT_TARGET_URL;
+        }
         // 使用权限管理工具进行用户的退出，注销登录
-        SecurityUtils.getSubject().logout();
-        return new ModelAndView(InternalResourceViewResolver.REDIRECT_URL_PREFIX + "/login.htm");
+        Subject subject = SecurityUtils.getSubject();
+        try {
+            subject.logout();
+        } catch (SessionException ise) {
+            logger.error(ise.getMessage(), ise);
+        }
+        WebUtils.issueRedirect(request, response, targetUrl);
     }
-
 }

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ss="http://www.springframework.org/schema/security" xmlns:jee="http://www.springframework.org/schema/jee"
-	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ss="http://www.springframework.org/schema/security" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
 	http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd
 	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd"
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
 	default-lazy-init="true">
 
 	<bean id="credentialsMatcher" class="org.gy.framework.shiro.credentials.RetryLimitHashedCredentialsMatcher">
@@ -34,12 +35,16 @@
 		<!--<property name="authorizationCacheName" value="authorizationCache"/> -->
 	</bean>
 
+	<!-- 继承FormAuthenticationFilter基于Form表单的身份验证过滤器，用于扩展 -->
+	<!-- <bean id="formAuthenticationFilter" class="org.gy.framework.shiro.filter.ExtendFormAuthenticationFilter"> <property name="usernameParam" value="username" /> <property name="passwordParam" value="password" /> <property name="rememberMeParam" value="rememberMe" /> <property name="loginUrl" value="/loginAjax.htm" /> </bean> -->
+
 	<!-- 配置shiro的过滤器工厂类，id- shiroFilter要和我们在web.xml中配置的过滤器一致 -->
 	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
 		<property name="securityManager" ref="securityManager" />
 		<property name="loginUrl" value="/login.htm" />
 		<property name="successUrl" value="/index.html" />
 		<property name="unauthorizedUrl" value="/error.html" />
+		<!-- <property name="filters"> <util:map> <entry key="authc" value-ref="formAuthenticationFilter" /> </util:map> </property> -->
 		<!-- 自定义权限配置 -->
 		<property name="filterChainDefinitionMap" ref="chainDefinitionSectionMetaSource" />
 	</bean>
@@ -47,11 +52,12 @@
 	<bean id="chainDefinitionSectionMetaSource" class="org.gy.framework.shiro.ChainDefinitionSectionMetaSource">
 		<property name="filterChainDefinitions">
 			<value>
+				/login.htm = anon
 				/favicon.ico = anon
 				/project/** = anon
-				/login.htm = anon
 				/error.html = anon
 				/wx = anon
+				/logout.htm = anon
 			</value>
 		</property>
 	</bean>
