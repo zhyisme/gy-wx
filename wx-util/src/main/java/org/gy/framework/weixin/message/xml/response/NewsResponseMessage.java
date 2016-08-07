@@ -7,7 +7,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
  * 
- * 功能描述: 响应消息
+ * 功能描述: 图文响应消息
  * 
  */
 @XStreamAlias("xml")
