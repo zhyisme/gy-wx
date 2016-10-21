@@ -10,6 +10,17 @@
 		<relativePath>../wx-pom/pom.xml</relativePath>
 	</parent>
 	<dependencies>
+		<!-- 二维码生成jar -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- log -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

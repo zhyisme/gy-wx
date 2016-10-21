@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app id="demo-admin-web" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+<web-app id="demo-admin-web" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 	<display-name>Archetype Created Web Application</display-name>
 	<!-- charactor encoding -->
 	<filter>
@@ -130,6 +131,17 @@
 	<servlet-mapping>
 		<servlet-name>weiXinServlet</servlet-name>
 		<url-pattern>/wx</url-pattern>
+	</servlet-mapping>
+
+	<!-- 二维码servlet -->
+	<servlet>
+		<servlet-name>QRCodeServlet</servlet-name>
+		<servlet-class>org.gy.framework.util.qrcode.QRCodeServlet</servlet-class>
+		<load-on-startup>6</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>QRCodeServlet</servlet-name>
+		<url-pattern>/qrcode</url-pattern>
 	</servlet-mapping>
 
 	<!-- index -->

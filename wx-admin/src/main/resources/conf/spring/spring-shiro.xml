@@ -58,6 +58,7 @@
 				/error.html = anon
 				/wx = anon
 				/logout.htm = anon
+				/qrcode = anon
 			</value>
 		</property>
 	</bean>
