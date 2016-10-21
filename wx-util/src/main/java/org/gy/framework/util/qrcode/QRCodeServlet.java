@@ -37,6 +37,7 @@ public class QRCodeServlet extends HttpServlet {
             // 设置content-type
             resp.setContentType(QRCodeFormatEnum.getContentType(param.getFormat()));
             QRCodeUtil.writeToStream(param, resp.getOutputStream());
+            logger.error("测试日志：" + System.currentTimeMillis());
         } catch (WriterException e) {
             logger.error("[QRCodeServlet]生成二维码异常：" + e.getMessage(), e);
         }
