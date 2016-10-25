@@ -5,10 +5,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -20,23 +22,30 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
+import org.apache.http.NoHttpResponseException;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,28 +55,91 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpClientUtil {
 
-    protected static final Logger logger                  = LoggerFactory.getLogger(HttpClientUtil.class);
+    protected static final Logger                           logger                          = LoggerFactory.getLogger(HttpClientUtil.class);
 
-    public static final String    METHOD_POST             = "POST";
-    public static final String    METHOD_GET              = "GET";
-    public static final String    DEFAULT_CHARSET         = "utf-8";
-    public static final String    DEFAULT_CONTENT_TYPE    = "application/json;charset=UTF-8";
-    public static final int       DEFAULT_CONNECT_TIMEOUT = 5000;
-    public static final int       DEFAULT_READ_TIMEOUT    = 5000;
+    public static final String                              METHOD_POST                     = "POST";
+    public static final String                              METHOD_GET                      = "GET";
+    public static final String                              DEFAULT_CHARSET                 = "utf-8";
+    public static final String                              DEFAULT_CONTENT_TYPE            = "application/json;charset=UTF-8";
+    public static final int                                 DEFAULT_CONNECT_TIMEOUT         = 5000;
+    public static final int                                 DEFAULT_READ_TIMEOUT            = 5000;
+    public static final int                                 DEFAULT_CONNECT_REQUEST_TIMEOUT = 5000;
 
-    private static HttpClient     httpClient;
+    public static final int                                 DEFAULT_RETRY_NUM               = 3;
+
+    private static final int                                MAX_TOTAL                       = 128;
+
+    private static final int                                MAX_PER_ROUTE                   = 32;
+
+    private static final RequestConfig                      requestConfig;
+
+    private static final PoolingHttpClientConnectionManager connectionManager;
+
+    private static final HttpClientBuilder                  httpBuilder;
+
+    private static final CloseableHttpClient                httpClient;
 
     static {
-        HttpClientBuilder builder = HttpClientBuilder.create();
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_READ_TIMEOUT).setConnectTimeout(DEFAULT_CONNECT_TIMEOUT).build();
-        builder.setDefaultRequestConfig(requestConfig);
-        httpClient = builder.build();
+        requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_READ_TIMEOUT).setConnectTimeout(DEFAULT_CONNECT_TIMEOUT).setConnectionRequestTimeout(DEFAULT_CONNECT_REQUEST_TIMEOUT).build();
+        connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(MAX_TOTAL);
+        connectionManager.setDefaultMaxPerRoute(MAX_PER_ROUTE);
+        httpBuilder = HttpClientBuilder.create();
+        httpBuilder.setDefaultRequestConfig(requestConfig);
+        httpBuilder.setConnectionManager(connectionManager);
+        // DefaultHttpRequestRetryHandler retryHandler = new DefaultHttpRequestRetryHandler(DEFAULT_RETRY_NUM, true);
+        // httpBuilder.setRetryHandler(retryHandler);
+        // httpBuilder.setRetryHandler(buildRetryHandler());
+        httpClient = httpBuilder.build();
     }
 
     public static void main(String[] args) {
-        String url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx1c460a2ee998cefb&secret=4b88500e02b8bd1ce4a20108bb660e81";
-        String result = defaultPost(url, null);
+        // String url =
+        // "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx1c460a2ee998cefb&secret=4b88500e02b8bd1ce4a20108bb660e81";
+        // String result = defaultPost(url, null);
+        // System.out.println(result);
+        String url = "http://127.0.0.1:8080/cpx-admin/test/retryHandler.htm";
+        String result = get(url, null);
         System.out.println(result);
+    }
+
+    public static HttpRequestRetryHandler buildRetryHandler() {
+        // 请求重试处理
+        return new HttpRequestRetryHandler() {
+            public boolean retryRequest(IOException exception,
+                                        int executionCount,
+                                        HttpContext context) {
+                if (executionCount >= DEFAULT_RETRY_NUM) {// 如果已经重试了3次，就放弃
+                    return false;
+                }
+                if (exception instanceof NoHttpResponseException) {// 如果服务器丢掉了连接，那么就重试
+                    return true;
+                }
+                if (exception instanceof SSLHandshakeException) {// 不要重试SSL握手异常
+                    return false;
+                }
+                if (exception instanceof InterruptedIOException) {// 超时
+                    return true;
+                }
+                if (exception instanceof UnknownHostException) {// 目标服务器不可达
+                    return false;
+                }
+                if (exception instanceof ConnectTimeoutException) {// 连接被拒绝
+                    return false;
+                }
+                if (exception instanceof SSLException) {// ssl握手异常
+                    return false;
+                }
+                // HttpClientContext clientContext = HttpClientContext.adapt(context);
+                // HttpRequest request = clientContext.getRequest();
+                // // 如果请求是幂等的，就再次尝试
+                // if (!(request instanceof HttpEntityEnclosingRequest)) {
+                // return true;
+                // }
+                return false;
+
+            }
+        };
     }
 
     public static String defaultGet(String getUrl) {
@@ -77,6 +149,41 @@ public class HttpClientUtil {
     public static String defaultPost(String postUrl,
                                      String param) {
         return post(postUrl, param, DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT, DEFAULT_CHARSET);
+    }
+
+    public static String postFormData(String postUrl,
+                                      String param) {
+        String contentType = "application/x-www-form-urlencoded";
+        String result = null;
+        HttpURLConnection conn = null;
+        DataOutputStream out = null;
+        try {
+            conn = getConnection(postUrl, METHOD_POST, DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
+            conn.setRequestProperty("Content-Type", contentType);
+            // 发送请求参数
+            if (param != null) {
+                // 获取URLConnection对象对应的输出流
+                out = new DataOutputStream(conn.getOutputStream());
+                out.write(param.getBytes(DEFAULT_CHARSET));
+                // flush输出流的缓冲
+                out.flush();
+            }
+            return getStreamAsString(conn.getInputStream(), DEFAULT_CHARSET);
+        } catch (Exception e) {
+            logger.error("发送POST请求异常：" + e.getMessage(), e);
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                }
+            }
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        return result;
     }
 
     /**
@@ -274,9 +381,9 @@ public class HttpClientUtil {
         return null;
     }
 
-    public static String post(String url,
-                              String body,
-                              Map<String, String> headers) {
+    public static String postBody(String url,
+                                  String body,
+                                  Map<String, String> headers) {
         HttpPost request = new HttpPost(url);
         try {
             wrapHeader(request, headers);// 设置请求头
@@ -292,9 +399,9 @@ public class HttpClientUtil {
         return null;
     }
 
-    public static String post(String url,
-                              Map<String, String> params,
-                              Map<String, String> headers) {
+    public static String postForm(String url,
+                                  Map<String, String> params,
+                                  Map<String, String> headers) {
         HttpPost request = new HttpPost(url);
         try {
             wrapHeader(request, headers);// 设置请求头
@@ -310,13 +417,26 @@ public class HttpClientUtil {
         return null;
     }
 
-    private static String execute(HttpRequestBase request) throws ClientProtocolException, IOException {
+    private static String execute(HttpRequestBase request) {
         String respJson = null;
-        HttpResponse response = httpClient.execute(request);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            HttpEntity httpEntity = response.getEntity();
-            respJson = EntityUtils.toString(httpEntity);
-            EntityUtils.consume(httpEntity);
+        CloseableHttpResponse response = null;
+        try {
+            response = httpClient.execute(request);
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                HttpEntity httpEntity = response.getEntity();
+                respJson = EntityUtils.toString(httpEntity, DEFAULT_CHARSET);
+                EntityUtils.consume(httpEntity);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                }
+            }
         }
         return respJson;
     }
@@ -337,7 +457,6 @@ public class HttpClientUtil {
         if (body != null) {
             StringEntity entity = new StringEntity(body, DEFAULT_CHARSET);// 解决中文乱码问题
             entity.setContentEncoding(DEFAULT_CHARSET);
-            entity.setContentType(DEFAULT_CONTENT_TYPE);
             request.setEntity(entity);
         }
     }
