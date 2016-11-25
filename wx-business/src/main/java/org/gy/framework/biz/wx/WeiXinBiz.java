@@ -2,6 +2,8 @@ package org.gy.framework.biz.wx;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -11,6 +13,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gy.framework.biz.BaseBiz;
 import org.gy.framework.model.WeixinReplyLog;
+import org.gy.framework.util.httpclient.HttpClientUtil;
+import org.gy.framework.util.json.JacksonMapper;
 import org.gy.framework.weixin.api.token.SimpleAccessToken;
 import org.gy.framework.weixin.config.Configurable;
 import org.gy.framework.weixin.config.WeiXinConfig;
@@ -63,7 +67,7 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
     public WeiXinConfig getWeiXinConfig() {
         return configurable.getWeiXinConfig();
     }
-    
+
     /**
      * 功能描述: 获取token
      * 
@@ -183,6 +187,12 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
         WeixinReplyLog log = wrapWeixinReplyLog(requestMessage);
         log.setContent(keywords);
         addReplyLog(log);
+        if ("0000".equals(keywords)) {
+            String accessToken = getToken();
+            String openId = requestMessage.getFromUserName();
+            Map<String, Object> map = getUserInfo(accessToken, openId);
+            return dealText(requestMessage, JacksonMapper.beanToJson(map));
+        }
 
         return dealText(requestMessage, "您发送的是文本消息！" + keywords);
     }
@@ -237,7 +247,10 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
             return dealText(requestMessage, "您点击了菜单！" + requestMessage.getEventKey());
         } else if (WeiXinConstantUtil.EVENT_TYPE_SUBSCRIBE.equals(event)) {
             // 订阅
-            return dealText(requestMessage, "谢谢您的关注！");
+            String accessToken = getToken();
+            String openId = requestMessage.getFromUserName();
+            Map<String, Object> map = getUserInfo(accessToken, openId);
+            return dealText(requestMessage, JacksonMapper.beanToJson(map));
 
         } else if (WeiXinConstantUtil.EVENT_TYPE_UNSUBSCRIBE.equals(event)) {
             // 取消订阅后用户再收不到公众号发送的消息，因此不需要回复消息
@@ -246,7 +259,18 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
         return null;
     }
 
-    private WeiXinResponse dealText(WeiXinRequest requestMessage, String message) {
+    private Map<String, Object> getUserInfo(String accessToken,
+                                            String openId) {
+        WeiXinConfig config = getWeiXinConfig();
+        Properties properties = config.getProperties();
+        String pattern = properties.getProperty("wx.account.user.url");
+        String url = MessageFormat.format(pattern, accessToken, openId);
+        String result = HttpClientUtil.get(url, null);
+        return JacksonMapper.jsonToBean(result, Map.class, String.class, Object.class);
+    }
+
+    private WeiXinResponse dealText(WeiXinRequest requestMessage,
+                                    String message) {
         TextResponseMessage responseMessage = new TextResponseMessage();
         responseMessage.setContent(message);
         responseMessage.setMsgType(WeiXinConstantUtil.MESSAGE_TYPE_TEXT);

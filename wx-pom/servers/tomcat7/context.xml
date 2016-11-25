@@ -24,10 +24,10 @@
 
 	<!-- Datasource JNDI define -->
 	<!-- 添加连接池驱动mysql-connector-java-5.1.33.jar 到  ${TOMCAT_HOME}/lib  -->
-	<Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" factory="org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory" maxActive="20" maxIdel="10" maxWait="1000" name="jdbc/DS" password="adminone" type="javax.sql.DataSource" url="jdbc:mysql://10.27.82.169/demo?zeroDateTimeBehavior=convertToNull" username="admin" />
-	<Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" factory="org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory" maxActive="20" maxIdel="10" maxWait="1000" name="jdbc/ReadDS" password="adminone" type="javax.sql.DataSource" url="jdbc:mysql://10.27.82.169:3306/demo?zeroDateTimeBehavior=convertToNull" username="admin" />
-	<ResourceLink global="jdbc/DS " name="jdbc/DS" type="javax.sql.DataSource" />
-	<ResourceLink global="jdbc/ReadDS " name="jdbc/ReadDS " type="javax.sql.DataSource" />
+	<Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" factory="org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory" maxActive="20" maxIdel="10" maxWait="1000" name="jdbc/demo-writeDS" password="root" type="javax.sql.DataSource" url="jdbc:mysql://172.19.137.246:3306/demo?zeroDateTimeBehavior=convertToNull" username="root" />
+	<Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" factory="org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory" maxActive="20" maxIdel="10" maxWait="1000" name="jdbc/demo-readDS" password="root" type="javax.sql.DataSource" url="jdbc:mysql://172.19.137.246:3306/demo?zeroDateTimeBehavior=convertToNull" username="root" />
+	<ResourceLink global="jdbc/demo-writeDS " name="jdbc/demo-writeDS" type="javax.sql.DataSource" />
+	<ResourceLink global="jdbc/demo-readDS " name="jdbc/demo-readDS " type="javax.sql.DataSource" />
 			
 		
 </Context>
