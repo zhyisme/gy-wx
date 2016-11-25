@@ -1,13 +1,3 @@
-/*
- * Copyright (C), 2002-2016, 苏宁易购电子商务有限公司
- * FileName: WeixinController.java
- * Author:   guanyang/14050360
- * Date:     2016年11月25日 下午1:34:49
- * Description: //模块目的、功能描述      
- * History: //修改记录
- * <author>      <time>      <version>    <desc>
- * 修改人姓名             修改时间            版本号                  描述
- */
 package org.gy.framework.controller;
 
 import java.io.UnsupportedEncodingException;
