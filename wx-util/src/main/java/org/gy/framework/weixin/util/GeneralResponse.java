@@ -1,5 +1,7 @@
 package org.gy.framework.weixin.util;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 /**
  * 功能描述：微信返回值封装对象
  * 
@@ -12,12 +14,14 @@ public class GeneralResponse {
     /**
      * 返回码，0表示成功，其他参见微信全局返回码说明
      */
-    private String             errcode;
+    @JsonProperty(value = "errcode")
+    private String             errcode      = "0";
 
     /**
      * 返回消息
      */
-    private String             errmsg;
+    @JsonProperty(value = "errmsg")
+    private String             errmsg       = "ok";
 
     /**
      * 是否成功判断

@@ -43,6 +43,7 @@ public class WeiXinServlet extends HttpServlet {
     /**
      * 确认请求来自微信服务器
      */
+    @Override
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
         // 微信加密签名
@@ -60,12 +61,12 @@ public class WeiXinServlet extends HttpServlet {
             out.print(echostr);
         }
         out.close();
-        out = null;
     }
 
     /**
      * 处理微信服务器发来的消息
      */
+    @Override
     public void doPost(HttpServletRequest request,
                        HttpServletResponse response) throws ServletException, IOException {
         // 将请求、响应的编码均设置为UTF-8（防止中文乱码）

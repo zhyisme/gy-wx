@@ -28,6 +28,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -87,25 +88,13 @@ public class HttpClientUtil {
         httpBuilder = HttpClientBuilder.create();
         httpBuilder.setDefaultRequestConfig(requestConfig);
         httpBuilder.setConnectionManager(connectionManager);
-        // DefaultHttpRequestRetryHandler retryHandler = new DefaultHttpRequestRetryHandler(DEFAULT_RETRY_NUM, true);
-        // httpBuilder.setRetryHandler(retryHandler);
-        // httpBuilder.setRetryHandler(buildRetryHandler());
         httpClient = httpBuilder.build();
-    }
-
-    public static void main(String[] args) {
-        // String url =
-        // "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx1c460a2ee998cefb&secret=4b88500e02b8bd1ce4a20108bb660e81";
-        // String result = defaultPost(url, null);
-        // System.out.println(result);
-        String url = "http://127.0.0.1:8080/cpx-admin/test/retryHandler.htm";
-        String result = get(url, null);
-        System.out.println(result);
     }
 
     public static HttpRequestRetryHandler buildRetryHandler() {
         // 请求重试处理
         return new HttpRequestRetryHandler() {
+            @Override
             public boolean retryRequest(IOException exception,
                                         int executionCount,
                                         HttpContext context) {
@@ -130,12 +119,6 @@ public class HttpClientUtil {
                 if (exception instanceof SSLException) {// ssl握手异常
                     return false;
                 }
-                // HttpClientContext clientContext = HttpClientContext.adapt(context);
-                // HttpRequest request = clientContext.getRequest();
-                // // 如果请求是幂等的，就再次尝试
-                // if (!(request instanceof HttpEntityEnclosingRequest)) {
-                // return true;
-                // }
                 return false;
 
             }
@@ -195,7 +178,7 @@ public class HttpClientUtil {
      */
     public static String baiduPush(String pushUrl,
                                    List<String> paramUrl) {
-        if (pushUrl == null || paramUrl == null || paramUrl.size() == 0) {
+        if (pushUrl == null ||CollectionUtils.isEmpty(paramUrl)) {
             return null;
         }
         // 百度要求提交的链接必须一行一个
@@ -311,7 +294,7 @@ public class HttpClientUtil {
                                                    String method,
                                                    int connectTimeout,
                                                    int readTimeout) throws Exception {
-        HttpURLConnection conn = null;
+        HttpURLConnection conn;
         URL url = new URL(urlPath);
         if (isHttps(url)) {
             SSLContext ctx = SSLContext.getInstance("TLS");
@@ -321,6 +304,7 @@ public class HttpClientUtil {
             HttpsURLConnection connHttps = (HttpsURLConnection) url.openConnection();
             connHttps.setSSLSocketFactory(ctx.getSocketFactory());
             connHttps.setHostnameVerifier(new HostnameVerifier() {
+                @Override
                 public boolean verify(String hostname,
                                       SSLSession session) {
                     return true;
@@ -343,25 +327,23 @@ public class HttpClientUtil {
     }
 
     private static boolean isHttps(URL url) {
-        if ("https".equals(url.getProtocol())) {
-            return true;
-        } else {
-            return false;
-        }
+        return "https".equals(url.getProtocol());
     }
 
     private static class DefaultTrustManager implements X509TrustManager {
-
+        @Override
         public X509Certificate[] getAcceptedIssuers() {
             return null;
         }
-
+        @Override
         public void checkClientTrusted(X509Certificate[] chain,
                                        String authType) throws CertificateException {
+            //
         }
-
+        @Override
         public void checkServerTrusted(X509Certificate[] chain,
                                        String authType) throws CertificateException {
+            //
         }
     }
 
@@ -374,9 +356,7 @@ public class HttpClientUtil {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {
-            if (request != null) {
-                request.releaseConnection();
-            }
+            request.releaseConnection();
         }
         return null;
     }
@@ -392,9 +372,7 @@ public class HttpClientUtil {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {
-            if (request != null) {
-                request.releaseConnection();
-            }
+            request.releaseConnection();
         }
         return null;
     }
@@ -410,9 +388,7 @@ public class HttpClientUtil {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {
-            if (request != null) {
-                request.releaseConnection();
-            }
+            request.releaseConnection();
         }
         return null;
     }

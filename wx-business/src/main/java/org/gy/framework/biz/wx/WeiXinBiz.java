@@ -18,12 +18,15 @@ import org.gy.framework.util.json.JacksonMapper;
 import org.gy.framework.weixin.api.token.SimpleAccessToken;
 import org.gy.framework.weixin.config.Configurable;
 import org.gy.framework.weixin.config.WeiXinConfig;
-import org.gy.framework.weixin.config.WeiXinConfigFactory;
 import org.gy.framework.weixin.exception.WeiXinException;
-import org.gy.framework.weixin.message.xml.request.EventRequestMessage;
 import org.gy.framework.weixin.message.xml.request.LinkNormalRequestMessage;
 import org.gy.framework.weixin.message.xml.request.LocationNormalRequestMessage;
+import org.gy.framework.weixin.message.xml.request.MenuClickEventRequestMessage;
+import org.gy.framework.weixin.message.xml.request.MenuViewEventRequestMessage;
+import org.gy.framework.weixin.message.xml.request.ScanEventRequestMessage;
+import org.gy.framework.weixin.message.xml.request.SubscribeEventRequestMessage;
 import org.gy.framework.weixin.message.xml.request.TextNormalRequestMessage;
+import org.gy.framework.weixin.message.xml.request.UnSubscribeEventRequestMessage;
 import org.gy.framework.weixin.message.xml.request.WeiXinRequest;
 import org.gy.framework.weixin.message.xml.response.TextResponseMessage;
 import org.gy.framework.weixin.message.xml.response.WeiXinResponse;
@@ -37,27 +40,24 @@ import org.springframework.stereotype.Service;
 public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
 
     @Autowired
-    private ThreadPoolExecutor       executor;
+    private ThreadPoolExecutor             executor;
     @Autowired
-    private WeiXinUserRecordBiz      weiXinUserRecordBiz;
+    private WeiXinUserRecordBiz            weiXinUserRecordBiz;
 
     @Autowired
-    private WeiXinReplyLogBiz        weiXinReplyLogBiz;
+    private WeiXinReplyLogBiz              weiXinReplyLogBiz;
 
-    private static SimpleAccessToken simpleAccessToken;
-
-    private static Configurable      configurable;
+    private static final SimpleAccessToken simpleAccessToken;
 
     static {
-        configurable = WeiXinConfigFactory.getConfigurable(WeiXinConfigFactory.DEFAULT_LOCATION);
-        simpleAccessToken = new SimpleAccessToken(configurable);
+        simpleAccessToken = new SimpleAccessToken(WeiXinUtil.getConfigurable());
     }
 
     /**
      * 获取全局配置
      */
     public Configurable getConfigurable() {
-        return configurable;
+        return WeiXinUtil.getConfigurable();
     }
 
     /**
@@ -65,7 +65,7 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
      * 
      */
     public WeiXinConfig getWeiXinConfig() {
-        return configurable.getWeiXinConfig();
+        return WeiXinUtil.getWeiXinConfig();
     }
 
     /**
@@ -101,6 +101,7 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
                 try {
                     is.close();
                 } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
                 }
             }
         }
@@ -108,6 +109,10 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
             // 解析成消息对象
             try {
                 WeiXinRequest message = WeiXinUtil.parsingWeiXinMessage(xml);
+                if (message == null) {
+                    // 消息类型未实现时，返回空值，不需要处理，返回空即可
+                    return null;
+                }
                 // 生成响应对象
                 WeiXinResponse responseMessage = dispatch(message);
                 if (responseMessage != null) {
@@ -128,16 +133,34 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
     public WeiXinResponse dispatch(WeiXinRequest requestMessage) {
 
         WeiXinResponse responseMessage = null;
+        // 记录用户操作
+        final String openId = requestMessage.getFromUserName();
+
         if (requestMessage instanceof TextNormalRequestMessage) {
+            // 文本消息
             responseMessage = dealMessage((TextNormalRequestMessage) requestMessage);
         } else if (requestMessage instanceof LocationNormalRequestMessage) {
+            // 位置消息
             responseMessage = dealMessage((LocationNormalRequestMessage) requestMessage);
-        } else if (requestMessage instanceof EventRequestMessage) {
-            responseMessage = dealMessage((EventRequestMessage) requestMessage);
         } else if (requestMessage instanceof LinkNormalRequestMessage) {
+            // 链接消息
             responseMessage = dealMessage((LinkNormalRequestMessage) requestMessage);
+        } else if (requestMessage instanceof SubscribeEventRequestMessage) {
+            // 订阅、未关注扫描带参数二维码事件
+            SubscribeEventRequestMessage message = (SubscribeEventRequestMessage) requestMessage;
+            responseMessage = dealMessage(message);
+        } else if (requestMessage instanceof UnSubscribeEventRequestMessage) {
+            // 取消订阅后用户再收不到公众号发送的消息，因此不需要回复消息
+        } else if (requestMessage instanceof ScanEventRequestMessage) {
+            // 用户已关注时扫描带参数二维码事件
+        } else if (requestMessage instanceof MenuClickEventRequestMessage) {
+            // 菜单拉取消息事件
+            responseMessage = dealMessage((MenuClickEventRequestMessage) requestMessage);
+        } else if (requestMessage instanceof MenuViewEventRequestMessage) {
+            // 菜单跳转链接事件
+            // 查看事件,跳转到具体的网页，不需要处理
         }
-        final String openId = requestMessage.getFromUserName();
+
         // 记录用户操作
         addUserRecord(openId);
         return responseMessage;
@@ -220,43 +243,26 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
      */
     private WeiXinResponse dealMessage(LinkNormalRequestMessage requestMessage) {
 
-        // 记录日志
-        // WeixinReplyLog log = wrapWeixinReplyLog(requestMessage);
-        // StringBuilder builder = new StringBuilder();
-        // builder.append(requestMessage.getTitle()).append(WeiXinConstantUtil.WEIXIN_LOG_SEPARATOR);
-        // builder.append(requestMessage.getDescription()).append(WeiXinConstantUtil.WEIXIN_LOG_SEPARATOR);
-        // builder.append(requestMessage.getUrl());
-        // log.setContent(builder.toString());
-        // addReplyLog(log);
-
         return dealText(requestMessage, "您发送的是链接消息！" + requestMessage.getUrl());
     }
 
     /**
-     * 事件推送处理
-     * 
+     * 订阅、未关注扫码事件处理
      */
-    private WeiXinResponse dealMessage(EventRequestMessage requestMessage) {
-        // 事件消息
-        String event = requestMessage.getEvent();
+    private WeiXinResponse dealMessage(SubscribeEventRequestMessage requestMessage) {
+        String accessToken = getToken();
+        String openId = requestMessage.getFromUserName();
+        Map<String, Object> map = getUserInfo(accessToken, openId);
+        return dealText(requestMessage, JacksonMapper.beanToJson(map));
 
-        if (WeiXinConstantUtil.EVENT_TYPE_VIEW.equals(event)) {
-            // 查看事件,跳转到具体的网页，不需要处理
-        } else if (WeiXinConstantUtil.EVENT_TYPE_CLICK.equals(event)) {
-            // 菜单点击事件
-            return dealText(requestMessage, "您点击了菜单！" + requestMessage.getEventKey());
-        } else if (WeiXinConstantUtil.EVENT_TYPE_SUBSCRIBE.equals(event)) {
-            // 订阅
-            String accessToken = getToken();
-            String openId = requestMessage.getFromUserName();
-            Map<String, Object> map = getUserInfo(accessToken, openId);
-            return dealText(requestMessage, JacksonMapper.beanToJson(map));
+    }
 
-        } else if (WeiXinConstantUtil.EVENT_TYPE_UNSUBSCRIBE.equals(event)) {
-            // 取消订阅后用户再收不到公众号发送的消息，因此不需要回复消息
-
-        }
-        return null;
+    /**
+     * 菜单拉取消息事件处理
+     */
+    private WeiXinResponse dealMessage(MenuClickEventRequestMessage requestMessage) {
+        // 菜单点击事件
+        return dealText(requestMessage, "您点击了菜单！" + requestMessage.getEventKey());
     }
 
     private Map<String, Object> getUserInfo(String accessToken,
