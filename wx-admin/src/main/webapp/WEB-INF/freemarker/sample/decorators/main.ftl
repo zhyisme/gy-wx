@@ -6,6 +6,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta http-equiv="Cache-Control" content="no-transform" />
 		<meta name="applicable-device" content="pc">
+		<link rel="shortcut icon" href="//www.guanyang.org/favicon.ico" type="image/x-icon">
 		${head}
 	</head>
 	<body>
