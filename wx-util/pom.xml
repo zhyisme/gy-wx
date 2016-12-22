@@ -217,6 +217,12 @@
 			<artifactId>mybatis-generator-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- freemarker -->
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- org.aspectj -->
 		<dependency>
