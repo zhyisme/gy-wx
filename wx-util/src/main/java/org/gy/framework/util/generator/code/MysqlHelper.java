@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 /**
  * 功能描述: 连接数据库
  * 
- * @version 2.0.0
- * @author wuqinghe
  */
 public class MysqlHelper {
 

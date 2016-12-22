@@ -6,8 +6,6 @@ import java.util.List;
 /**
  * 功能描述: 抽象实例类
  * 
- * @version 2.0.0
- * @author wuqinghe
  */
 public class Entity {
     // 实体所在的包名

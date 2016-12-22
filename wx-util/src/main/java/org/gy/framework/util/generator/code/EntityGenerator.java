@@ -20,8 +20,6 @@ import freemarker.template.TemplateException;
 /**
  * 功能描述: 实例类生成工具
  * 
- * @version 2.0.0
- * @author wuqinghe
  */
 public class EntityGenerator {
 

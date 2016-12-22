@@ -3,8 +3,6 @@ package org.gy.framework.util.generator.code;
 /**
  * 功能描述: 属性和列
  * 
- * @version 2.0.0
- * @author wuqinghe
  */
 public class Property {
     /** 注释 */
