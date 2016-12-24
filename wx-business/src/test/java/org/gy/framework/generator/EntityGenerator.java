@@ -1,4 +1,4 @@
-package org.gy.framework.util.generator.code;
+package org.gy.framework.generator;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,7 +32,7 @@ public class EntityGenerator {
     public static final String  DEFAULT_JS_EXT                 = ".js";
     public static final String  DEFAULT_FTL_EXT                = ".ftl";
 
-    public static final String  DEFAULT_TEMPLATE_PATH          = "/conf/generate/template";
+    public static final String  DEFAULT_TEMPLATE_PATH          = "/conf/generator/template";
 
     public static final String  DEFAULT_ENTITY_KEY             = "entity";
 
@@ -50,21 +50,21 @@ public class EntityGenerator {
     public static final String  DEFAULT_FTL_FILE_SUFFIX        = "List";
     public static final String  DEFAULT_JS_FILE_SUFFIX         = "List";
     public static final String  DEFAULT_SQL_PREFIX             = "sqlMap_";
-    
-    private EntityGenerator(){
-        
+
+    private EntityGenerator() {
+
     }
 
     public static void main(String[] args) {
         // 生成文件之后，需要刷新工程，才能看到新生成的文件
 
         // 定义数据库配置
-        String url = "jdbc:mysql://10.27.150.199:3306/assp";
-        String user = "assp_read";
-        String password = "sn_321";
-        String schema = "assp";
+        String url = "jdbc:mysql://localhost:3306/demo?useUnicode=true&characterEncoding=utf-8";
+        String user = "root";
+        String password = "root";
+        String schema = "demo";
         String[] tableNames = {
-            "diamond_record"
+            "weixin_reply_log"
         };
 
         // 设置基础参数
@@ -77,31 +77,29 @@ public class EntityGenerator {
 
         // 加载实体数据
         EntityGenerator.loadEntities(param);
-
-        // 生成实体
-        param.setTargetJavaPackage("org.gy.framework.entity");
-        EntityGenerator.generateEntity(param);
+        // 设置包的统一父路径，必须定义，否则biz，xml无法获取路径
+        param.setRootPackage("org.gy.framework");
 
         // 生成Biz
         param.setTargetJavaPackage("org.gy.framework.biz");
         EntityGenerator.generateBiz(param);
-
+        //
         // 生成Bo
         param.setTargetJavaPackage("org.gy.framework.bo");
         EntityGenerator.generateBo(param);
-
-        // 生成Controller
-        param.setTargetJavaPackage("org.gy.framework.controller");
-        EntityGenerator.generateController(param);
-
-        // 生成ftl
-        param.setTargetJavaPackage("freemarker.web.page");
-        EntityGenerator.generateFtl(param);
-
-        // 生成js
-        param.setTargetJavaPackage("project.web.js");
-        EntityGenerator.generateJs(param);
-
+        //
+        // // 生成Controller
+        // param.setTargetJavaPackage("org.gy.framework.controller");
+        // EntityGenerator.generateController(param);
+        //
+        // // 生成ftl
+        // param.setTargetJavaPackage("freemarker.web.page");
+        // EntityGenerator.generateFtl(param);
+        //
+        // // 生成js
+        // param.setTargetJavaPackage("project.web.js");
+        // EntityGenerator.generateJs(param);
+        //
         // 生产成sql
         param.setTargetJavaPackage("conf.sqlMap");
         EntityGenerator.generateSqlXml(param);
@@ -273,6 +271,11 @@ public class EntityGenerator {
             prefix = param.getFilePrefix().trim();
         }
         entity.setFileName(prefix + entity.getClassName() + suffix + param.getFileExt());
+
+        if (StringUtils.isBlank(param.getRootPackage())) {
+            throw new IllegalArgumentException("包的根路径没有定义，将导致biz，xml无法获取路径");
+        }
+        entity.setRootPackage(param.getRootPackage());
 
     }
 

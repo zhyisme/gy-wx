@@ -46,7 +46,7 @@
 		<!--对应数据库表名 -->
 		<table tableName="${generator.tableName}" schema="${mysql.schema}">
 			<!-- JDBC :相当于在生成的insert元素上添加useGeneratedKeys="true"和keyProperty属性 -->
-			<generatedKey column="id" sqlStatement="JDBC" />
+			<generatedKey column="${generator.tableName.keyProperty}" sqlStatement="JDBC" />
 		</table>
 
 	</context>

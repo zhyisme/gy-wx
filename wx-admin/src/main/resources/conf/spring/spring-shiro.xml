@@ -61,6 +61,7 @@
 				/qrcode = anon
 				/logout.htm = anon
 				/wx/** = anon
+				/test/** = anon
 			</value>
 		</property>
 	</bean>

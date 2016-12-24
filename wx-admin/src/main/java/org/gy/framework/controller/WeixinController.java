@@ -1,8 +1,10 @@
 package org.gy.framework.controller;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -65,7 +67,7 @@ public class WeixinController extends BaseController {
     @RequestMapping(value = "/auth", method = RequestMethod.GET)
     public ModelAndView auth(String code) {
         ModelAndView mav = new ModelAndView(new MappingJackson2JsonView());
-        Response<Object> response = new Response<Object>();
+        Response<Serializable> response = new Response<Serializable>();
         mav.addObject("response", response);
         if ((StringUtils.isNotEmpty(code)) && (!"authdeny".equals(code))) {
             WeiXinConfig config = weiXinBiz.getWeiXinConfig();
@@ -75,7 +77,7 @@ public class WeixinController extends BaseController {
 
             // 通过code换取网页授权access_token，获取token接口没有调用频次限制
             String result = HttpClientUtil.get(url, null);
-            Map<String, Object> map = JacksonMapper.jsonToBean(result, Map.class, String.class, Object.class);
+            HashMap<String, Object> map = JacksonMapper.jsonToBean(result, HashMap.class, String.class, Object.class);
             String accessToken = (String) map.get("access_token");
             String openId = (String) map.get("openid");
             if (StringUtils.isBlank(accessToken) || StringUtils.isBlank(openId)) {

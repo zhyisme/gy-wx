@@ -1,4 +1,4 @@
-package org.gy.framework.util.generator.code;
+package org.gy.framework.generator;
 
 import java.util.Date;
 import java.util.List;
@@ -22,10 +22,16 @@ public class Entity {
     // 是否有构造函数
     private boolean        constructors;
     private String         tableName;
+
     // 生成的文件名
     private String         fileName;
     // 表的注释用于ftl页面
     private String         tableComment;
+
+    // 创建时间
+    private Date           createDate;
+    // 包的根路径
+    private String         rootPackage;
 
     public String getTableComment() {
         return tableComment;
@@ -83,10 +89,6 @@ public class Entity {
         this.tableName = tableName;
     }
 
-    public Date getCreateDate() {
-        return new Date();
-    }
-
     public List<String> getPackages() {
         return packages;
     }
@@ -119,6 +121,42 @@ public class Entity {
 
     public void setLowerClassName(String lowerClassName) {
         this.lowerClassName = lowerClassName;
+    }
+
+    /**
+     * 设置createDate
+     * 
+     * @param createDate createDate
+     */
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    /**
+     * 获取createDate
+     * 
+     * @return createDate createDate
+     */
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    /**
+     * 获取rootPackage
+     * 
+     * @return rootPackage rootPackage
+     */
+    public String getRootPackage() {
+        return rootPackage;
+    }
+
+    /**
+     * 设置rootPackage
+     * 
+     * @param rootPackage rootPackage
+     */
+    public void setRootPackage(String rootPackage) {
+        this.rootPackage = rootPackage;
     }
 
 }

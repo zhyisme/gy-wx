@@ -45,7 +45,7 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
     private WeiXinUserRecordBiz            weiXinUserRecordBiz;
 
     @Autowired
-    private WeiXinReplyLogBiz              weiXinReplyLogBiz;
+    private WeixinReplyLogBiz              weiXinReplyLogBiz;
 
     private static final SimpleAccessToken simpleAccessToken;
 
@@ -185,7 +185,7 @@ public class WeiXinBiz extends BaseBiz implements WeiXinCoreService {
             @Override
             public void run() {
                 try {
-                    weiXinReplyLogBiz.insert(entity);
+                    weiXinReplyLogBiz.insertSelective(entity);
                 } catch (Exception e) {
                     logger.error("添加微信日志异常：" + e.getMessage(), e);
                 }

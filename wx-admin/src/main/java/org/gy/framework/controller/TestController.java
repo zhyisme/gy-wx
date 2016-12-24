@@ -3,9 +3,13 @@ package org.gy.framework.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.gy.framework.biz.wx.WeiXinBiz;
 import org.gy.framework.biz.wx.WeiXinMenuConfigBiz;
+import org.gy.framework.biz.wx.WeixinReplyLogBiz;
+import org.gy.framework.bo.WeixinReplyLogBo;
+import org.gy.framework.model.WeixinReplyLog;
 import org.gy.framework.weixin.api.custom.CustomService;
 import org.gy.framework.weixin.config.Configurable;
 import org.gy.framework.weixin.message.json.custom.CustomArticle;
@@ -29,6 +33,9 @@ public class TestController extends BaseController {
     @Autowired
     private WeiXinMenuConfigBiz weiXinMenuConfigBiz;
 
+    @Autowired
+    private WeixinReplyLogBiz   weiXinReplyLogBiz;
+
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     public ModelAndView test() {
         ModelAndView mav = new ModelAndView();
@@ -44,6 +51,37 @@ public class TestController extends BaseController {
         logger.debug("测试日志debug");
         logger.info("测试日志info");
         logger.error("测试日志error");
+        return mav;
+    }
+
+    @RequestMapping(value = "/replyLog", method = RequestMethod.GET)
+    public ModelAndView replyLog() {
+        ModelAndView mav = new ModelAndView(new MappingJacksonJsonView());
+        WeixinReplyLog entity = new WeixinReplyLog();
+        entity.setContent(UUID.randomUUID().toString());
+        entity.setOpenId("test");
+        entity.setType("text");
+        entity.setCreateTime(new Date());
+        Long id = weiXinReplyLogBiz.insertSelective(entity);
+        mav.addObject("insert", entity);
+        WeixinReplyLog entity1 = new WeixinReplyLog();
+        entity1.setId(id);
+        entity1.setOpenId(UUID.randomUUID().toString().replace("-", ""));
+        int num = weiXinReplyLogBiz.updateByPrimaryKeySelective(entity1);
+        mav.addObject("update", num);
+        WeixinReplyLog data = weiXinReplyLogBiz.selectByPrimaryKey(id);
+        mav.addObject("select", data);
+        List<Long> ids = new ArrayList<Long>();
+        ids.add(id);
+        int result = weiXinReplyLogBiz.deleteByPrimaryKey(ids);
+        mav.addObject("delete", result);
+        WeixinReplyLogBo query = new WeixinReplyLogBo();
+        query.setPageSize(5);
+        query.setPageNo(2);
+        List<WeixinReplyLog> list = weiXinReplyLogBiz.queryForList(query);
+        mav.addObject("queryForList", list);
+        int count =weiXinReplyLogBiz.queryForCount(query);
+        mav.addObject("queryForCount", count);
         return mav;
     }
 

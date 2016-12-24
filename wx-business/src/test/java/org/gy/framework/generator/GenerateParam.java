@@ -1,4 +1,4 @@
-package org.gy.framework.util.generator.code;
+package org.gy.framework.generator;
 
 import java.util.List;
 
@@ -61,6 +61,11 @@ public class GenerateParam {
      * 映射实体封装集合
      */
     private List<Entity> entities;
+
+    /**
+     * 包的根路径
+     */
+    private String       rootPackage;
 
     /**
      * 获取数据库url
@@ -294,6 +299,24 @@ public class GenerateParam {
      */
     public void setEntities(List<Entity> entities) {
         this.entities = entities;
+    }
+
+    /**
+     * 获取包的根路径
+     * 
+     * @return rootPackage 包的根路径
+     */
+    public String getRootPackage() {
+        return rootPackage;
+    }
+
+    /**
+     * 设置包的根路径
+     * 
+     * @param rootPackage 包的根路径
+     */
+    public void setRootPackage(String rootPackage) {
+        this.rootPackage = rootPackage;
     }
 
 }

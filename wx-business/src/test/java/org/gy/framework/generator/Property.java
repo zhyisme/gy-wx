@@ -1,4 +1,4 @@
-package org.gy.framework.util.generator.code;
+package org.gy.framework.generator;
 
 /**
  * 功能描述: 属性和列

@@ -1,4 +1,4 @@
-package org.gy.framework.util.generator.code;
+package org.gy.framework.generator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,8 +61,8 @@ public class ColumnToPropertyUtil {
         if (StringUtils.isBlank(column)) {
             return "";
         } else if (!column.contains(DEFAULT_LINE)) {
-            // 不含下划线，仅将首字母小写
-            return column.substring(0, 1).toLowerCase() + column.substring(1);
+            // 不含下划线，全部字母都小写
+            return column.toLowerCase();
         } else {
             StringBuilder result = new StringBuilder();
             // 用下划线将原始字符串分割

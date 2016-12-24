@@ -1,4 +1,4 @@
-package org.gy.framework.util.generator.code;
+package org.gy.framework.generator;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -145,6 +146,7 @@ public class MysqlHelper {
                     packages.add(javaType);
                 }
             }
+            entity.setCreateDate(new Date());
             entity.setProperties(properties);
             entity.setPackages(Arrays.asList(packages.toArray(new String[] {})));
         } catch (SQLException e) {

@@ -1,8 +1,10 @@
-var rootPathAdmin = $("#rootPathAdmin").val();// 项目根路径
-var url = rootPathAdmin + "/query.do";
+var url =  "${r'${adminServer}'}/${entity.lowerClassName}/query.htm";
+var saveUrl = "${r'${adminServer}'}/${entity.lowerClassName}/save.htm";
+var getUrl = "${r'${adminServer}'}/${entity.lowerClassName}/get.htm";
+var deleteUrl = "${r'${adminServer}'}/${entity.lowerClassName}/delete.htm";
 tdSize();// 必须放在外面
 $(document).ready(function() {
-	init();
+	inintPage();
 });
 
 /**
@@ -14,7 +16,7 @@ function stringToDate(strDate){
     var date = new Date(strDate);
     return date;
 }	
-var regDateExpectTime = /^(\d+)-(\d{1,2})-(\d{1,2})$/;
+var regDateExpectTime = /^(\d+)-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})$/;
 
 function getQueryParams() {
 	<#list entity.properties as property>
@@ -62,16 +64,20 @@ function getQueryParams() {
  */
  
 
-function innitPage() {
+function inintPage() {
 	$('#tt').datagrid({
 		rownumbers : true,
 		pagination : true,
-		method : 'POST',
-		height : 325,
+		method : 'GET',
+		height : "70%",
 		width : "100%",
 		queryParams : getQueryParams(),
-		url : "",
-		columns : [ [ 
+		url : url,
+		toolbar : '#tbMenus',
+		columns : [ [  {
+			field : 'ck',
+			checkbox : "true"
+		},
 		<#list entity.properties as property>
 				<#if property.javaType=="Date">
 					<#if !property_has_next>
@@ -114,7 +120,12 @@ function innitPage() {
 				</#if>
 				
 		</#list>
-		] ]
+		] ],
+		onDblClickRow : function(rowIndex, row) {
+			if (row) {
+				// toEdit(row);
+			}
+		}
 	});
 }
 
@@ -161,4 +172,138 @@ function doSearch() {
  */
 function doReset() {
 	$('#searchFrm').form('clear');
+}
+
+/**
+ * 重新加载
+ */
+function reload() {
+	$("#tt").datagrid('reload');
+}
+/**
+ * 添加弹框
+ */
+function add() {
+	$('#addDialog').dialog('open').dialog('setTitle', '添加');
+	$('#addDialog').form('clear');
+	$("#addForm").form('disableValidation');// 不验证，仅提交的时候验证
+}
+/**
+ * 关闭弹框
+ */
+function cancel() {
+	$('#addForm').form('clear');
+	$('#addDialog').dialog('close');
+}
+/**
+ * 编辑
+ */
+function edit() {
+	var selected = $('#tt').datagrid('getSelections');
+	if (!selected || selected.length != 1) {
+		msgShow("请选择要操作的一行记录！");
+		return;
+	}
+	var row = selected[0];
+	toEdit(row);
+}
+
+function toEdit(row) {
+	$('#addDialog').form('clear');
+	$("#addForm").form('disableValidation');// 不验证，仅提交的时候验证
+	
+	//TODO:时间需要格式化，不然load报错
+	//row.startTime = formattime(row.startTime);
+	//row.endTime = formattime(row.endTime);
+	
+	$("#addForm").form("load", row);// 直接加在grid数据
+	$('#addDialog').dialog('open').dialog('setTitle', '编辑');
+
+}
+
+/**
+ * 保存
+ */
+function save() {
+	$("#addForm").form('submit', {
+		url : saveUrl,
+		onSubmit : function() {
+			$("#addForm").form('enableValidation');// 验证
+			return $("#addForm").form('validate');
+		},
+		success : function(data) {
+			var result = eval('(' + data + ')');
+			if (result.response && result.response.message) {
+				msgShow(result.response.message);
+				if (result.response.success) {
+					cancel();
+					reload();
+				} else {
+					$("#addForm").form('disableValidation');// 不验证，仅提交的时候验证
+				}
+			} else {
+				msgShow("系统异常，请稍后再试！");
+			}
+		}
+	});
+}
+
+/**
+ * 删除
+ */
+function del() {
+	var selected = $('#tt').datagrid('getSelections');
+	if (!selected || selected.length == 0) {
+		msgShow("请选择要操作的行！");
+		return;
+	}
+	var keys = [];
+	for (var i = 0; i < selected.length; i++) {
+		//TODO:如果主键有调整，需要修改
+		keys.push(selected[i].id);
+	}
+	$.messager.confirm("提示信息", '您确定要删除当前选中的<strong style="color:red">' + keys.length + '</strong>条记录吗？', function(r) {
+		if (r) {
+			var param = {
+				ids : keys.join(",")
+			};
+			ajaxLoad(deleteUrl, "POST", param, function(data) {
+				if (data.response && data.response.message) {
+					msgShow(data.response.message);
+					if (data.response.success) {
+						reload();
+					}
+				} else {
+					msgShow("系统异常，请稍后再试！");
+				}
+			});
+		}
+	});
+}
+
+/**
+ * ajax请求封装
+ * 
+ * @param url
+ * @param method
+ * @param param
+ * @param successCallback
+ */
+function ajaxLoad(url, method, param, successCallback) {
+	$.ajax({
+		url : url,
+		type : method,
+		cache : false,
+		data : param,
+		error : function(e) {
+			msgShow("系统异常，请稍后再试！");
+		},
+		success : function(data) {
+			if (!!data) {
+				successCallback(data);
+			} else {
+				msgShow("系统异常，请稍后再试！");
+			}
+		}
+	});
 }

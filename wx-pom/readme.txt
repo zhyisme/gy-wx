@@ -11,10 +11,10 @@ Goals参数：`clean install -Dmaven.test.skip=true -Dfile.encoding=UTF-8 -Dmave
 2. 修改cpx-business\src\main\resources\conf\generator\generator.properties中配置  
 1）jdbc信息  
 2）将`generator.tableName`设置成要生成的表名，每次生成的时候修改  
+3) 针对自增主键，将`generator.tableName.keyProperty`设置驼峰之后的属性名称  
 
 3. 修改cpx-business\src\main\resources\conf\generator\mysqlGeneratorConfig.xml中配置    
-1）针对自增主键，将`<generatedKey column="ID" sqlStatement="JDBC" />`(49行)中column改为对应表的主键，每次生成的时候修改  
-2）针对非自增主键，将`<generatedKey column="ID" sqlStatement="JDBC" />`(49行)注释掉，每次生成的时候修改  
+1）针对非自增主键，将`<generatedKey column="${generator.tableName.keyProperty}" sqlStatement="JDBC" />`(49行)注释掉，每次生成的时候修改  
 
 4. 选择cpx-business工程，运行maven - Run As Maven build...  
 Goals参数：`mybatis-generator:generate`
