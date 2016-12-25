@@ -28,8 +28,7 @@ public class PasswordHelper {
      * @return
      * @Author gy
      */
-    public static String generatePassword(String source,
-                                          String salt) {
+    public static String generatePassword(String source, String salt) {
         return new SimpleHash(algorithmName, source, ByteSource.Util.bytes(salt), hashIterations).toHex();
     }
 
@@ -42,12 +41,10 @@ public class PasswordHelper {
      * @return
      * @Author gy
      */
-    public static boolean validateEqual(String source,
-                                        String salt,
-                                        String target) {
+    public static boolean validateEqual(String source, String salt, String target) {
         return generatePassword(source, salt).equals(target);
     }
-
+    
     public static void main(String[] args) {
         System.out.println(generatePassword("123456", "b6d97d8b2ff7d54a1b9819b4e9c78205"));
     }

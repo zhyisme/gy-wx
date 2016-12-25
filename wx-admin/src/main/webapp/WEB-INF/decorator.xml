@@ -9,7 +9,7 @@
 		<pattern>*.shtml</pattern><!-- 过滤公共头尾的动态页面 -->
 	</excludes>
 	<!-- <decorator> 标签代表对定义的请求名进行相应的装饰 -->
-	<decorator name="main" page="sample/decorators/main.ftl">
+	<decorator name="main" page="admin/decorators/main.ftl">
 		<pattern>/*.htm</pattern>
 	</decorator>
 </decorators>

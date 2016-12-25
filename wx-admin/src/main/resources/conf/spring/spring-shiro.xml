@@ -43,7 +43,7 @@
 	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
 		<property name="securityManager" ref="securityManager" />
 		<property name="loginUrl" value="/login.htm" />
-		<property name="successUrl" value="/index.html" />
+		<property name="successUrl" value="/index.htm" />
 		<property name="unauthorizedUrl" value="/error.html" />
 		<!-- <property name="filters"> <util:map> <entry key="authc" value-ref="formAuthenticationFilter" /> </util:map> </property> -->
 		<!-- 自定义权限配置 -->

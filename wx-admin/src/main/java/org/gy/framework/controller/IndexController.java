@@ -16,29 +16,49 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.session.SessionException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.util.WebUtils;
+import org.gy.framework.biz.SysUserBiz;
+import org.gy.framework.model.SysUser;
+import org.gy.framework.util.PasswordHelper;
+import org.gy.framework.util.UserSessionUtil;
+import org.gy.framework.util.response.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 
 @Controller
 @RequestMapping("/")
 public class IndexController extends BaseController {
 
-    public static final String DEFAULT_LOGIN             = "sample/login.ftl";
+    public static final String DEFAULT_LOGIN             = "admin/login.ftl";
 
     public static final String DEFAULT_TARGET_URL_PARAM  = "targetUrl";
     public static final String DEFAULT_LOGOUT_TARGET_URL = "/login.htm";
-    public static final String DEFAULT_LOGIN_TARGET_URL  = "/index.html";
+    public static final String DEFAULT_LOGIN_TARGET_URL  = "/index.htm";
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView toLogin() {
-        ModelAndView mav = new ModelAndView(DEFAULT_LOGIN);
+    @Autowired
+    private SysUserBiz         sysUserBiz;
+
+    @RequestMapping(value = "/index", method = RequestMethod.GET)
+    public ModelAndView index() {
+        ModelAndView mav = new ModelAndView("admin/index.ftl");
+        SysUser user = UserSessionUtil.getCurrentSysUser();
+        mav.addObject("user", user);
         return mav;
     }
 
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public ModelAndView toLogin() {
+        return new ModelAndView(DEFAULT_LOGIN);
+    }
+
     @RequestMapping(value = "login", method = RequestMethod.POST)
-    public ModelAndView login(String username, String password, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ModelAndView login(String username,
+                              String password,
+                              HttpServletRequest request,
+                              HttpServletResponse response) throws IOException {
 
         ModelAndView mav = new ModelAndView(DEFAULT_LOGIN);
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
@@ -84,7 +104,8 @@ public class IndexController extends BaseController {
      * @throws IOException
      */
     @RequestMapping(value = "logout", method = RequestMethod.GET)
-    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void logout(HttpServletRequest request,
+                       HttpServletResponse response) throws IOException {
         String targetUrl = request.getParameter(DEFAULT_TARGET_URL_PARAM);
         if (StringUtils.isBlank(targetUrl)) {
             targetUrl = DEFAULT_LOGOUT_TARGET_URL;
@@ -97,5 +118,32 @@ public class IndexController extends BaseController {
             logger.error(ise.getMessage(), ise);
         }
         WebUtils.issueRedirect(request, response, targetUrl);
+    }
+
+    @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
+    public ModelAndView changePassword(String oldPassword,
+                                       String newPassword) {
+        ModelAndView mav = new ModelAndView(new MappingJacksonJsonView());
+        Response result = new Response();
+        result.setSuccess(false);
+        mav.addObject("response", result);
+        result.setSuccess(false);
+        if (StringUtils.isBlank(oldPassword) || StringUtils.isBlank(newPassword)) {
+            result.setMessage("参数有误，请重新输入");
+            return mav;
+        }
+        SysUser user = UserSessionUtil.getCurrentSysUser();
+        boolean flag = PasswordHelper.validateEqual(oldPassword, user.getSalt(), user.getPassword());
+        if (!flag) {
+            result.setMessage("原密码不正确，请重新输入");
+            return mav;
+        }
+        String salt = PasswordHelper.generateSalt();// 生成新的盐
+        user.setSalt(salt);
+        user.setPassword(PasswordHelper.generatePassword(newPassword, salt));
+        sysUserBiz.updateByPrimaryKeySelective(user);
+        result.setSuccess(true);
+        result.setMessage("修改成功，请用新密码重新登录");
+        return mav;
     }
 }

@@ -1,6 +1,6 @@
 package org.gy.framework.controller;
 
-import org.gy.framework.biz.wx.WeiXinMenuConfigBiz;
+import org.gy.framework.biz.WeiXinMenuConfigBiz;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

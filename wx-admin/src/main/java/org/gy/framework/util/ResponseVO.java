@@ -3,7 +3,7 @@ package org.gy.framework.util;
 import java.io.Serializable;
 
 /**
- * 前台统一Json响应<br>
+ * 统一Json响应<br>
  * 
  */
 public final class ResponseVO<T> implements Serializable {

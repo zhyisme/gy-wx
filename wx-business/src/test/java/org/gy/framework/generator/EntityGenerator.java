@@ -80,29 +80,29 @@ public class EntityGenerator {
         // 设置包的统一父路径，必须定义，否则biz，xml无法获取路径
         param.setRootPackage("org.gy.framework");
 
-        // 生成Biz
-        param.setTargetJavaPackage("org.gy.framework.biz");
-        EntityGenerator.generateBiz(param);
-        //
-        // 生成Bo
-        param.setTargetJavaPackage("org.gy.framework.bo");
-        EntityGenerator.generateBo(param);
+        // // 生成Biz
+        // param.setTargetJavaPackage("org.gy.framework.biz");
+        // EntityGenerator.generateBiz(param);
+        // //
+        // // 生成Bo
+        // param.setTargetJavaPackage("org.gy.framework.bo");
+        // EntityGenerator.generateBo(param);
         //
         // // 生成Controller
         // param.setTargetJavaPackage("org.gy.framework.controller");
         // EntityGenerator.generateController(param);
         //
-        // // 生成ftl
-        // param.setTargetJavaPackage("freemarker.web.page");
-        // EntityGenerator.generateFtl(param);
+        // 生成ftl
+        param.setTargetJavaPackage("freemarker.web.page");
+        EntityGenerator.generateFtl(param);
+
+        // 生成js
+        param.setTargetJavaPackage("project.web.js");
+        EntityGenerator.generateJs(param);
         //
-        // // 生成js
-        // param.setTargetJavaPackage("project.web.js");
-        // EntityGenerator.generateJs(param);
-        //
-        // 生产成sql
-        param.setTargetJavaPackage("conf.sqlMap");
-        EntityGenerator.generateSqlXml(param);
+        // // 生产成sql
+        // param.setTargetJavaPackage("conf.sqlMap");
+        // EntityGenerator.generateSqlXml(param);
     }
 
     /**

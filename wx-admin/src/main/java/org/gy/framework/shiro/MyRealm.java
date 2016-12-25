@@ -12,7 +12,7 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
-import org.gy.framework.biz.sysuser.SysUserBiz;
+import org.gy.framework.biz.SysUserBiz;
 import org.gy.framework.model.SysUser;
 import org.gy.framework.util.ConstantUtil;
 import org.springframework.beans.factory.annotation.Autowired;

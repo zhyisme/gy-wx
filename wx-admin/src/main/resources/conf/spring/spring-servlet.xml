@@ -15,7 +15,7 @@
    	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 	<context:component-scan base-package="org.gy.framework.controller" />
-	
+
 	<!-- 当前时间 sdf.format(new Date()) -->
 	<bean id="sdf" class="java.text.SimpleDateFormat">
 		<constructor-arg index="0" value="yyyyMMddHHmmss" />
@@ -109,8 +109,14 @@
 	<!--<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource"> <property name="basename" value="classpath:i18n/messages" /> </bean> -->
 
 	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="webBindingInitializer">
+			<bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+				<property name="conversionService" ref="conversionService" />
+			</bean>
+		</property>
 		<property name="messageConverters">
 			<list>
+				<bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter" />
 				<ref bean="mappingJacksonHttpMessageConverter" />
 			</list>
 		</property>
@@ -120,6 +126,17 @@
 			<list>
 				<value>application/json;charset=UTF-8</value>
 				<value>text/html;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- 自定义参数转换 -->
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<!-- 转换器 -->
+		<property name="converters">
+			<list>
+				<!-- 日期类型转换 -->
+				<bean class="org.gy.framework.util.convert.CustomDateConverter" />
 			</list>
 		</property>
 	</bean>

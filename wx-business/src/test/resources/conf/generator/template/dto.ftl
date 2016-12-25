@@ -1,9 +1,7 @@
 /**
 * Copyright (C), 2011-2016, org.gy.sample
-* ProjectName:	cpx-business
-* FileName: ${entity.fileName}.java
 *
-* @Author bianle
+* @Author gy
 * @Date ${entity.createDate?string("yyyy-MM-dd HH:mm:ss")}
 */
 package ${entity.javaPackage};

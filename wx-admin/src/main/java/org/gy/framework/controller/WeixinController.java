@@ -12,7 +12,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.gy.framework.biz.wx.WeiXinBiz;
+import org.gy.framework.biz.WeiXinBiz;
 import org.gy.framework.util.httpclient.HttpClientUtil;
 import org.gy.framework.util.json.JacksonMapper;
 import org.gy.framework.util.response.Response;

@@ -5,9 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.gy.framework.biz.wx.WeiXinBiz;
-import org.gy.framework.biz.wx.WeiXinMenuConfigBiz;
-import org.gy.framework.biz.wx.WeixinReplyLogBiz;
+import org.gy.framework.biz.WeiXinBiz;
+import org.gy.framework.biz.WeiXinMenuConfigBiz;
+import org.gy.framework.biz.WeixinReplyLogBiz;
 import org.gy.framework.bo.WeixinReplyLogBo;
 import org.gy.framework.model.WeixinReplyLog;
 import org.gy.framework.weixin.api.custom.CustomService;
@@ -39,7 +39,7 @@ public class TestController extends BaseController {
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     public ModelAndView test() {
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("sample/test.ftl");
+        mav.setViewName("admin/test.ftl");
         mav.addObject("time", new Date());
         return mav;
     }
