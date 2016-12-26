@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50610
 File Encoding         : 65001
 
-Date: 2016-12-25 16:10:06
+Date: 2016-12-26 15:30:54
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -142,27 +142,3 @@ CREATE TABLE `weixin_user_record` (
 -- ----------------------------
 -- Records of weixin_user_record
 -- ----------------------------
-
--- ----------------------------
--- Procedure structure for insertMemberDetail
--- ----------------------------
-DROP PROCEDURE IF EXISTS `insertMemberDetail`;
-DELIMITER ;;
-CREATE DEFINER=`root`@`%` PROCEDURE `insertMemberDetail`(IN num int)
-BEGIN
-	#Routine body goes here...
-		declare i int;
-		DECLARE var_employee_id varchar(64);
-		DECLARE var_member_id varchar(12);
-		DECLARE var_type_code int;
-    set i=0;
-    while i<num do
-				SELECT FLOOR(100000 + (RAND() * 90000)) INTO var_member_id;
-				SELECT FLOOR(1000 + (RAND() * 900)) INTO var_type_code;
-				select replace(uuid(), '-', '') INTO var_employee_id;
-        insert into rm_employee_member_query_detail(employee_id,member_id,type_code,count_time) values(var_employee_id,var_member_id,var_type_code,NOW());
-        set i=i+1;
-     end while;
-END
-;;
-DELIMITER ;
