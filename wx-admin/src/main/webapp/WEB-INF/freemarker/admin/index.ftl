@@ -38,7 +38,8 @@
 						</div>
 						<iframe width="800" scrolling="no" height="120" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=19&color=%23&bgc=%23&bdc=%23C6C6C6&icon=1&py=chaoyang&temp=1&num=5"></iframe>
 					</div>-->
-					<h1>Welcome，${user.accountName!""}</h1>
+					<#--<h1>Welcome，${user.accountName!""}</h1>-->
+					<iframe name="mainFrame" scrolling="auto" frameborder="0"  src="//www.guanyang.org" style="width:100%;height:100%;"></iframe>
 				</div>
 			</div>
 		</div>
