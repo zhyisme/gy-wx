@@ -62,6 +62,7 @@
 				/logout.htm = anon
 				/wx/** = anon
 				/test/** = anon
+				/.well-known/** = anon
 			</value>
 		</property>
 	</bean>
