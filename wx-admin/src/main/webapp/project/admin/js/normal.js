@@ -439,67 +439,6 @@ function msgShow(msg, title) {
 	});
 }
 
-/**
- * ajax 异步请求 error时调用的函数 有以下三个参数：a:XMLHttpRequest 对象、b:textStatus 错误信息、c:
- * errorThrown 捕获的异常对象。 如果发生了错误，错误信息（第二个参数）除了得到null之外， 还可能是"timeout", "error",
- * "notmodified" 和 "parsererror"。
- */
-function AJAXError_fn(a, b, c, data) {
-	data = data || {};
-	if (b == "error") {
-		if (a.status == 200) { // 跳转到登陆页
-			window.top.location.href = data.basePath || top.location.href
-					|| "http://paimai.suning.com/admin";
-		} else {
-			msgShow(data.errorMsg || "服务器异常");
-		}
-	} else if (b == "timeout") {
-		msgShow(data.timeoutMsg || "请求超时");
-	} else if (b == "parsererror") {
-		msgShow(data.parserErrorMsg || "解析数据出错");
-	} else {
-		msgShow(data.requestMsg || "请求异常");
-	}
-}
-
-/**
- * ajax 异步请求 success 时调用的函数
- * 
- */
-function AJAXSuccess_fn(data) {
-	data = data || {};
-	if (data.sessionTimeout) {
-		// 跳转到登陆页
-		window.top.location.href = data.basePath || top.location.href
-				|| "http://paimai.suning.com/admin";
-	}
-}
-/**
- * 获得 服务器的当前时间
- * 
- * @basePath 项目主路径
- * @return 获得服务器时间的秒值
- */
-function getDbDate(basePath) {
-	var currdate = 0;
-	$.ajax({
-		url : basePath + 'rest/topicMain/getDBDate?_='
-				+ Math.ceil(Math.random() * 10000) + 1,
-		type : 'GET',
-		dataType : 'json',
-		timeout : 1000,
-		async : false,
-		success : function(data) {
-			currdate = data;
-		},
-		error : function(a, b, c) {
-			AJAXError_fn(a, b, c, {
-				"basePath" : basePath
-			});
-		}
-	});
-	return currdate;
-}
 
 /**
  * 实现在dataGrid中鼠标移到所在列时，有悬浮的提示信息 来显示列的内容
