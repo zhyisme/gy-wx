@@ -30,7 +30,7 @@
 		
 		<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
 			<div id="tabs" class="easyui-tabs"  fit="true" border="false" >
-				<div title="欢迎使用" style="padding:20px;overflow:hidden;" closable="false" id="home">
+				<div title="欢迎使用" style="overflow:hidden;" closable="false" id="home">
 					<#--天气-->
 					<#--<div style="PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; PADDING-TOP: 0px; WIDTH: 100%; HEIGHT: 148px; border: 1px solid #cacaca; background: #FFFFFF">
 						<div style="WIDTH: 100%; clear: both; height: 31px; background-image: url(http://www.tianqi.com/static/images/code/bg_13.jpg); background-repeat: repeat-x; border-bottom: 1px solid #cacaca;">
