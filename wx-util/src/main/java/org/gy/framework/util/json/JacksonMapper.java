@@ -6,6 +6,7 @@ import java.util.List;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.JavaType;
+import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +83,26 @@ public class JacksonMapper {
         try {
             JavaType javaType = getCollectionType(collectionClass, elementClasses);
             return mapper.readValue(json, javaType);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * 功能描述: JSON对象转换为JavaBean
+     * 
+     * @param json
+     * @param valueTypeRef
+     * @return
+     */
+    public static <T> T jsonToBean(String json,
+                                   TypeReference<T> valueTypeRef) {
+        if (json == null || json.length() == 0) {
+            return null;
+        }
+        try {
+            return mapper.readValue(json, valueTypeRef);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
