@@ -99,11 +99,6 @@
 			<artifactId>jackson-core-asl</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>fastjson</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>javax.validation</groupId>
