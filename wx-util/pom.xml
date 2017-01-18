@@ -10,6 +10,24 @@
 		<relativePath>../wx-pom/pom.xml</relativePath>
 	</parent>
 	<dependencies>
+		<!-- kryo -->
+		<dependency>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>kryo</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- fastjson -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- hessian -->
+		<dependency>
+			<groupId>com.caucho</groupId>
+			<artifactId>hessian</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- 二维码生成jar -->
 		<dependency>
 			<groupId>com.google.zxing</groupId>
