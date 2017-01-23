@@ -1,6 +1,5 @@
 package org.gy.framework.util.interceptor.support;
 
-
 /**
  * 功能描述：异常消息格式化输出
  * 
@@ -10,12 +9,14 @@ public class MessageUtil {
     /**
      * 成功状态
      */
-    public static final String SUCCESS_CODE = CodeType.SUCCESS_CODE.getCode();
+    public static final String   SUCCESS_CODE = CodeType.SUCCESS_CODE.getCode();
 
     /**
      * 未知错误
      */
-    public static final String UNKNOWN      = "Unknown";
+    public static final Object[] UNKNOWN      = {
+                                                  "Unknown"
+                                              };
 
     /**
      * 功能描述: 成功包装
@@ -28,7 +29,7 @@ public class MessageUtil {
 
     /**
      * 功能描述: 包装返回结果
-     *
+     * 
      * @param result
      * @param e
      */
@@ -41,7 +42,7 @@ public class MessageUtil {
 
     /**
      * 功能描述: 包装返回结果
-     *
+     * 
      * @param result
      * @param type
      * @param placeholder
@@ -50,7 +51,8 @@ public class MessageUtil {
                                     CodeType type,
                                     Object... placeholder) {
         String message = buildMessage(type, placeholder);
-        result.setCode(type.getCode());
+        CodeType localType = wrapCodeType(type);
+        result.setCode(localType.getCode());
         result.setMessage(message);
     }
 
@@ -77,22 +79,23 @@ public class MessageUtil {
     public static String buildMessage(boolean codeFlag,
                                       CodeType type,
                                       Object... placeholder) {
-        if (null == type) {
-            type = CodeType.E999999;
-        }
-        if (placeholder == null) {
-            placeholder = new Object[] {
-                UNKNOWN
-            };
-        }
-        String formatMessage = null;
+        CodeType localType = wrapCodeType(type);
+        Object[] holderLocal = wrapPlaceholder(placeholder);
+        String formatMessage;
         if (codeFlag) {
-            formatMessage = type.buildMessageWithCode(placeholder);
+            formatMessage = localType.buildMessageWithCode(holderLocal);
         } else {
-            formatMessage = type.buildMessage(placeholder);
+            formatMessage = localType.buildMessage(holderLocal);
         }
         return formatMessage;
 
     }
 
+    private static CodeType wrapCodeType(CodeType type) {
+        return null == type ? CodeType.E999999 : type;
+    }
+
+    private static Object[] wrapPlaceholder(Object... placeholder) {
+        return placeholder == null ? UNKNOWN : placeholder;
+    }
 }

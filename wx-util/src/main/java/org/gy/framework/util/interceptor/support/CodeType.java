@@ -26,12 +26,23 @@ public enum CodeType {
     E999999("E999999", "系统异常：{0}", "统一系统异常枚举");
 
     /**
+     * 标识码
+     */
+    private String code;
+    /**
+     * 消息格式
+     */
+    private String pattern;
+    /**
+     * 描述
+     */
+    private String description;
+
+    /**
      * 功能描述: 获取格式化消息，带错误码
      * 
      * @param placeholder
      * @return
-     * @version 2.0.0
-     * @author guanyang/14050360
      */
     public String buildMessageWithCode(Object... placeholder) {
         return buildMessageWithCode(this, placeholder);
@@ -56,7 +67,7 @@ public enum CodeType {
      */
     public static String buildMessageWithCode(CodeType type,
                                               Object... placeholder) {
-        return "[" + type.getCode() + "]" + buildMessage(type, placeholder);
+        return new StringBuilder("[").append(type.getCode()).append("]").append(buildMessage(type, placeholder)).toString();
     }
 
     /**
@@ -70,20 +81,6 @@ public enum CodeType {
                                       Object... placeholder) {
         return MessageFormat.format(type.getPattern(), placeholder);
     }
-
-    /**
-     * 标识码
-     */
-    private String code;
-    /**
-     * 消息格式
-     */
-    private String pattern;
-
-    /**
-     * 描述
-     */
-    private String description;
 
     private CodeType(String code, String pattern, String description) {
         this.code = code;
